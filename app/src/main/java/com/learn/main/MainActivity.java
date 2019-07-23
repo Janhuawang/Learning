@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import com.learn.R;
 import com.learn.thread.LockActivity;
 import com.learn.thread.SynchronizedActivity;
+import com.learn.thread.VolatileActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private void initData() {
         lists.add(new ItemBean("线程Lock", LockActivity.class.getName()));
         lists.add(new ItemBean("线程Synchronized", SynchronizedActivity.class.getName()));
+        lists.add(new ItemBean("线程volatile", VolatileActivity.class.getName()));
     }
 
     private void initView() {

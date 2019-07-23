@@ -93,6 +93,7 @@ public class SynchronizedActivity extends AppCompatActivity {
      * @param it
      */
     private void onHandle3(String it) {
+        //Object.class为锁对象，其实就是锁的钥匙，使用同一把钥匙的锁是同步的
         synchronized (this) {
             Log.e("Learn", "我来了-" + it);
             ++c;
