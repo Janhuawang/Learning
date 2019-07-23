@@ -19,7 +19,14 @@
 
         <!-- 锁 -->
         <activity
-            android:name="com.learn.lock.LockActivity"
+            android:name="com.learn.thread.LockActivity"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- 锁 -->
+        <activity
+            android:name="com.learn.thread.SynchronizedActivity"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
