@@ -38,6 +38,14 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
+        <!-- dialog - rotating -->
+        <activity
+            android:name="com.learn.dialog.rotating.DialogRotatingActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" />
+
     </application>
 
 </manifest>

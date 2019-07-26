@@ -3,4 +3,18 @@
     <color name="colorPrimary">#008577</color>
     <color name="colorPrimaryDark">#00574B</color>
     <color name="colorAccent">#D81B60</color>
+
+    <!-- 白色 -->
+    <color name="white">#FFFFFF</color>
+    <!-- 黑色 -->
+    <color name="black">#000000</color>
+    <!-- 灰色 -->
+    <color name="grey">#C1C1C1</color>
+    <!-- 透明色 -->
+    <color name="transparent">#00000000</color>
+    <!-- 文本框、单选、多选框的选中、光标颜色值 -->
+    <color name="accent">#2196f3</color>
+    <!--文字色-->
+    <color name="text_display">#212121</color>
+
 </resources>

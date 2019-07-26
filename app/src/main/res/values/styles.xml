@@ -8,4 +8,8 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!-- 自定义AlertDialog显示风格 -->
+    <style name="AlertDialogCustomAIPrompt" parent="Theme.AppCompat.Light.Dialog.Alert">
+    </style>
+
 </resources>
