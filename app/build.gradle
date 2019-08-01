@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.test.one'
 
 android {
     compileSdkVersion 28
