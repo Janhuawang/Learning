@@ -1,6 +1,4 @@
 apply plugin: 'com.android.application'
-apply plugin: 'com.test.one'
-
 android {
     compileSdkVersion 28
     defaultConfig {
@@ -22,4 +20,88 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation DESIGN
+}
+
+/**
+ * 脚本构建块 优先执行
+ */
+buildscript {
+    repositories {
+        maven {
+            url '../repo'
+        }
+
+    }
+    dependencies {
+//        classpath 'com.plugin.custom:PrintPlugin:1.0'  // 拼接方式依赖
+        classpath group: 'com.plugin.custom', name: 'PrintPlugin',   // 分体方式依赖
+                version: '1.0'
+    }
+}
+
+
+/*
+* 第一种方式：在Module中定义
+* 1、给插件传参测试
+* */
+apply plugin: HelloPlugin
+/**
+ * 传参
+ */
+hellobean {
+    name = '曹操'
+    age = '1'
+}
+/**
+ * Bean定义
+ */
+class HelloPluginExtension {
+    String name
+    String age
+}
+
+class HelloPlugin implements Plugin<Project> {
+    // 此方法接受一个Project对象
+    void apply(Project project) {
+        System.out.println("========================");
+        System.out.println("自定义Plugin的第一种方式 在我们构建项目的build.gradle脚本中直接编写!");
+
+        // extensions 容器保存了hellobean 的参数，hellobean 为Hellobean的实体
+        project.extensions.create("hellobean", HelloPluginExtension)
+        System.out.println("name=${project.hellobean.name}  age=${project.hellobean.age}");
+
+        System.out.println("========================");
+
+        // 向project对象添加hello任务
+        project.task('hello') {
+            doLast {
+                println "Hello from the HelloPlugin name= ${project.hellobean.name} age = ${project.hellobean.age}"
+            }
+        }
+    }
+}
+
+
+/**
+ * 第二种方式：在buildsrc下的插件可以直接访问到
+ * 尝试过了需要有.properties文件的配置才行，不然会找不见
+ */
+apply plugin: 'MyPlugin'
+
+/**
+ * 使用本地自定义的Task
+ */
+task greeting(type: com.test.one.GreetingTask) {
+    greeting = 'another project working!'
+}
+
+
+/**
+ * 第三种方式： maven形式依赖 目前配置的是本地库
+ */
+apply plugin: 'PrintPlugin'
+printbean {
+    name '哈哈哈'
+    sex '女'
+    age '18岁了'
 }

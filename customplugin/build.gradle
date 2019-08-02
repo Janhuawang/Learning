@@ -1,0 +1,27 @@
+apply plugin: 'groovy'
+apply plugin: 'maven-publish'
+
+dependencies {
+    compile gradleApi() //gradle sdk
+    compile localGroovy() //groovy sdk
+}
+
+publishing{
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+
+            groupId 'com.plugin.custom'
+            artifactId 'PrintPlugin'
+            version '1.0'
+
+        }
+    }
+
+    repositories{
+        maven {
+            // change to point to your repo, e.g. http://my.org/repo
+            url "../repo"
+        }
+    }
+}
