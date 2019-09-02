@@ -7,9 +7,12 @@ import android.support.v7.widget.RecyclerView;
 
 import com.learn.R;
 import com.learn.dialog.rotating.DialogRotatingActivity;
+import com.learn.thread.AsyncTaskActivity;
 import com.learn.thread.LockActivity;
 import com.learn.thread.SynchronizedActivity;
 import com.learn.thread.VolatileActivity;
+
+import net.archeryc.glidedemo.sample.ZoomActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         lists.add(new ItemBean("线程Synchronized", SynchronizedActivity.class.getName()));
         lists.add(new ItemBean("线程volatile", VolatileActivity.class.getName()));
         lists.add(new ItemBean("弹框Rotating", DialogRotatingActivity.class.getName()));
+        lists.add(new ItemBean("AsyncTask", AsyncTaskActivity.class.getName()));
+        lists.add(new ItemBean("Zoom", ZoomActivity.class.getName()));
     }
 
     private void initView() {

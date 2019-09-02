@@ -2,7 +2,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.learn">
 
+    <!--允许访问网络-->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!--允许访问网络状态-->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <!--允许访问wifi状态-->
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+
     <application
+        android:name="com.learn.base.IApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -44,6 +52,30 @@
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="landscape"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- AsyncTask -->
+        <activity
+            android:name="com.learn.thread.AsyncTaskActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- BigPhotoActivity -->
+        <activity
+            android:name="net.archeryc.glidedemo.GlidePhotoView.BigPhotoActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- ZoomActivity -->
+        <activity
+            android:name="net.archeryc.glidedemo.sample.ZoomActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
     </application>

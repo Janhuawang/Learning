@@ -12,4 +12,12 @@
     <style name="AlertDialogCustomAIPrompt" parent="Theme.AppCompat.Light.Dialog.Alert">
     </style>
 
+
+    <style name="AnimationActivity">
+        <item name="android:activityOpenEnterAnimation">@null</item>
+        <item name="android:activityOpenExitAnimation">@null</item>
+        <item name="android:activityCloseEnterAnimation">@null</item>
+        <item name="android:activityCloseExitAnimation">@null</item>
+    </style>
+
 </resources>

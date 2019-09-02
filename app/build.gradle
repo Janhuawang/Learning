@@ -15,11 +15,18 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {//目录指向配置
+        main {
+            jniLibs.srcDirs = ['libs']//指定lib库目录
+        }
+    }
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation DESIGN
+    implementation 'com.github.bumptech.glide:glide:4.8.0'
 }
 
 /**
@@ -72,15 +79,54 @@ class HelloPlugin implements Plugin<Project> {
 
         System.out.println("========================");
 
-        // 向project对象添加hello任务
-        project.task('hello') {
-            doLast {
+        project.afterEvaluate {
+            println "HelloPlugin.project.afterEvaluate= ${project.hellobean.name} age = ${project.hellobean.age}"
+            // 向project对象添加hello任务
+
+            project.task('hello') {
                 println "Hello from the HelloPlugin name= ${project.hellobean.name} age = ${project.hellobean.age}"
+
+                doFirst{
+                    System.out.println("hello开始");
+                }
+                doLast {
+                    System.out.println("hello结束");
+                }
+            }
+
+            Task a = project.tasks["hello"]
+            a.doFirst{
+                System.out.println("doFirst");
+            }
+            a.doLast{
+                System.out.println("doLast");
+            }
+
+            project.task('hello2',dependsOn:a) {
+                System.out.println("hello2");
+                doFirst{
+                    System.out.println("hello2开始");
+                }
+                doLast {
+                    System.out.println("hello2结束");
+                }
+            }
+
+
+            project.task('hello3') {
+                println "我是Hello3"
+
+                doFirst{
+                    System.out.println("我是Hello3开始");
+                }
+                doLast {
+                    System.out.println("我是Hello3结束");
+                }
             }
         }
     }
-}
 
+}
 
 /**
  * 第二种方式：在buildsrc下的插件可以直接访问到
