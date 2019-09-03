@@ -8,6 +8,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.bumptech.glide.request.RequestOptions;
 import com.learn.R;
 
 import net.archeryc.glidedemo.photoview.PhotoView;
@@ -87,7 +90,7 @@ public class BigPhotoActivity extends AppCompatActivity {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            GlidePhotoView photoView = new GlidePhotoView(BigPhotoActivity.this, urls.get(position));
+           /* GlidePhotoView photoView = new GlidePhotoView(BigPhotoActivity.this, urls.get(position));
             photoView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
                 @Override
                 public void onPhotoTap(View view, float x, float y) {
@@ -98,10 +101,34 @@ public class BigPhotoActivity extends AppCompatActivity {
                 public void onOutsidePhotoTap() {
                     finish();
                 }
-            });
+            });*/
+
+            final PhotoView photoView = new PhotoView(container.getContext());
             photoViews[position] = photoView;
 
-            container.addView(photoView);
+            photoView.setOnPhotoTapListener(new PhotoViewAttacher.OnPhotoTapListener() {
+                @Override
+                public void onPhotoTap(View view, float x, float y) {
+                    photoView.setReadModel(!photoView.isReadModel());
+                }
+
+                @Override
+                public void onOutsidePhotoTap() {
+                    photoView.setReadModel(!photoView.isReadModel());
+                }
+            });
+
+            RequestOptions requestOptions = new RequestOptions().dontAnimate();
+            requestOptions = requestOptions.diskCacheStrategy(DiskCacheStrategy.ALL);
+            if (com.bumptech.glide.util.Util.isValidDimensions(2048, 2048)) {
+                requestOptions = requestOptions.override(2048, 2048);
+            }
+            requestOptions = requestOptions.fitCenter();
+
+            Glide.with(BigPhotoActivity.this)
+                    .load(urls.get(position)).apply(requestOptions)
+                    .into(photoView);
+            container.addView(photoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
             return photoView;
         }
 

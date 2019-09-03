@@ -10,6 +10,8 @@ import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.view.View;
 
+import com.bumptech.glide.Glide;
+
 import net.archeryc.glidedemo.ImageLoader.ImageLoader;
 import net.archeryc.glidedemo.ImageLoader.LoadingImageListener;
 import net.archeryc.glidedemo.photoview.PhotoView;
@@ -66,7 +68,8 @@ public class GlidePhotoView extends PhotoView {
 
 
     private void initImageView() {
-        ImageLoader.getInstance().loadImage(mContext, mUrl, new LoadingImageListener() {
+
+        /*ImageLoader.getInstance().loadImage(mContext, mUrl, new LoadingImageListener() {
             @Override
             public void onLoadStart() {
                 startAnim();
@@ -93,7 +96,7 @@ public class GlidePhotoView extends PhotoView {
 
             }
         });
-
+*/
     }
 
     public void startAnim() {

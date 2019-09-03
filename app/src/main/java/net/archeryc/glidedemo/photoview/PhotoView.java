@@ -53,15 +53,11 @@ public class PhotoView extends ImageView implements IPhotoView {
         if (null == mAttacher || null == mAttacher.getImageView()) {
             mAttacher = new PhotoViewAttacher(this);
         }
-
         if (null != mPendingScaleType) {
             setScaleType(mPendingScaleType);
             mPendingScaleType = null;
         }
-
     }
-
-
 
     public PhotoViewAttacher getAttacher(){
         return mAttacher;
@@ -290,6 +286,16 @@ public class PhotoView extends ImageView implements IPhotoView {
     @Override
     public void setZoomable(boolean zoomable) {
         mAttacher.setZoomable(zoomable);
+    }
+
+    @Override
+    public boolean isReadModel() {
+        return mAttacher.isReadModel();
+    }
+
+    @Override
+    public void setReadModel(boolean isReadModel) {
+        mAttacher.setReadModel(isReadModel);
     }
 
     @Override
