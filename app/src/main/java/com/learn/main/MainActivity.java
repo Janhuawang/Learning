@@ -12,7 +12,7 @@ import com.learn.thread.LockActivity;
 import com.learn.thread.SynchronizedActivity;
 import com.learn.thread.VolatileActivity;
 
-import net.archeryc.glidedemo.sample.ZoomActivity;
+import com.learn.activity.glidedemo.sample.ZoomActivity;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -64,7 +64,7 @@
 
         <!-- BigPhotoActivity -->
         <activity
-            android:name="net.archeryc.glidedemo.GlidePhotoView.BigPhotoActivity"
+            android:name=".activity.glidedemo.GlidePhotoView.BigPhotoActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
@@ -72,7 +72,7 @@
 
         <!-- ZoomActivity -->
         <activity
-            android:name="net.archeryc.glidedemo.sample.ZoomActivity"
+            android:name=".activity.glidedemo.sample.ZoomActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"

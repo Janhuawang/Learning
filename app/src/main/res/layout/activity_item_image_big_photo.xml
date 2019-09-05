@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <net.archeryc.glidedemo.GlidePhotoView.HackyViewPager
+    <com.learn.activity.glidedemo.GlidePhotoView.HackyViewPager
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <net.archeryc.glidedemo.GlidePhotoView.CircleIndicator
+    <com.learn.activity.glidedemo.GlidePhotoView.CircleIndicator
         android:id="@+id/circleIndicator"
         android:layout_width="match_parent"
         android:layout_height="15dp"
@@ -18,5 +18,5 @@
         app:ci_drawable="@drawable/ci_drawable_selected"
         app:ci_drawable_unselected="@drawable/ci_drawable_unselected">
 
-    </net.archeryc.glidedemo.GlidePhotoView.CircleIndicator>
+    </com.learn.activity.glidedemo.GlidePhotoView.CircleIndicator>
 </FrameLayout>
