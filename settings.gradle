@@ -1,1 +1,1 @@
-include ':app', ':buildsrc', ':customplugin'
+include ':app', ':buildsrc', ':customplugin', ':ffmpeg'

@@ -18,7 +18,9 @@ import com.learn.widget.photoview.PhotoViewAttacher;
 
 import java.util.ArrayList;
 
-
+/**
+ * 图片预览阅读模式
+ */
 public class BigPhotoActivity extends AppCompatActivity {
     private ArrayList<String> urls = new ArrayList<>();
     private HackyViewPager viewPager;

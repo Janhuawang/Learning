@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <!--允许访问wifi状态-->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <!--允许写入sd卡-->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!--允许读取sd卡-->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name="com.learn.base.IApplication"
@@ -17,7 +21,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".main.MainActivity">
+        <activity android:name=".activity.main.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,28 +31,28 @@
 
         <!-- lock -->
         <activity
-            android:name="com.learn.thread.LockActivity"
+            android:name=".activity.thread.LockActivity"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
         <!-- synchronized -->
         <activity
-            android:name="com.learn.thread.SynchronizedActivity"
+            android:name=".activity.thread.SynchronizedActivity"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
         <!-- volatile -->
         <activity
-            android:name="com.learn.thread.VolatileActivity"
+            android:name=".activity.thread.VolatileActivity"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
         <!-- dialog - rotating -->
         <activity
-            android:name="com.learn.dialog.rotating.DialogRotatingActivity"
+            android:name=".activity.dialog.rotating.DialogRotatingActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="landscape"
@@ -56,13 +60,13 @@
 
         <!-- AsyncTask -->
         <activity
-            android:name="com.learn.thread.AsyncTaskActivity"
+            android:name=".activity.thread.AsyncTaskActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
-        <!-- BigPhotoActivity -->
+        <!-- 图片预览阅读模式 -->
         <activity
             android:name=".activity.glidedemo.GlidePhotoView.BigPhotoActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
@@ -70,9 +74,17 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
-        <!-- ZoomActivity -->
+        <!-- 图片缩放 -->
         <activity
             android:name=".activity.glidedemo.sample.ZoomActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- 视频剪裁 -->
+        <activity
+            android:name=".activity.ffmpeg.VideoClipActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
