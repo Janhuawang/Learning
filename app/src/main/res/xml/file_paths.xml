@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!--        xml文件是唯一设置分享的目录 ，不能用代码设置
+
+         1.<files-path>        getFilesDir()  /data/data//files目录
+         2.<cache-path>        getCacheDir()  /data/data//cache目录
+         3.<external-path>     Environment.getExternalStorageDirectory() SDCard/Android/data/你的应用的包名/files/ 目录
+         4.<external-files-path>     Context#getExternalFilesDir(String) Context.getExternalFilesDir(null).
+         5.<external-cache-path>      Context.getExternalCacheDir().
+     -->
+
+    <!--    path :代表设置的目录下一级目录 eg：<external-path path="images/"
+                整个目录为Environment.getExternalStorageDirectory()+"/images/"
+            name: 代表定义在Content中的字段 eg：name = "myimages" ，并且请求的内容的文件名为default_image.jpg
+                则 返回一个URI   content://com.example.myapp.fileprovider/myimages/default_image.jpg
+    -->
+
+    <!--系统子目录-->
+    <external-path
+        name="SYSTEM_EXT_DCIM"
+        path="DCIM" />
+
+    <files-path
+        name="SYSTEM_DCIM"
+        path="DCIM" />
+
+    <external-path
+        name="SYSTEM_EXT_DCIM"
+        path="DCIM/Camera" />
+
+    <files-path
+        name="SYSTEM_DCIM"
+        path="DCIM/Camera" />
+
+    <external-path
+        name="SYSTEM_EXT_DOWNLOAD"
+        path="Download" />
+
+    <files-path
+        name="SYSTEM_DOWNLOAD"
+        path="Download" />
+
+    <!-- UMU根目录-->
+    <files-path
+        name="UMU_DIR"
+        path="UMU" />
+
+    <cache-path
+        name="UMU_CACHE_DIR"
+        path="UMU" />
+
+    <external-path
+        name="UMU_EXT_DIR"
+        path="UMU" />
+
+    <external-cache-path
+        name="UMU_EXT_CACHE_DIR"
+        path="UMU" />
+
+    <!--Bugly-->
+    <!-- /storage/emulated/0/Download/${applicationId}/.beta/apk-->
+    <external-path
+        name="beta_external_path"
+        path="Download/" />
+
+    <!--/storage/emulated/0/Android/data/${applicationId}/files/apk/-->
+    <external-path
+        name="beta_external_files_path"
+        path="Android/data/" />
+</paths>
+

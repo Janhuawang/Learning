@@ -14,19 +14,31 @@ android {
         versionName "1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        ndk { abiFilters 'armeabi-v7a' }
+//        ndk { abiFilters 'armeabi-v7a' }
 
     }
+
+    /**
+     * 签名配置
+     */
+    signingConfigs {
+        sign {
+            storeFile file(STORE_FILE_PATH)
+            storePassword STORE_PASSWORD
+            keyAlias KEY_ALIAS
+            keyPassword KEY_PASSWORD
+            v2SigningEnabled false
+        }
+    }
+
+    lintOptions {
+        abortOnError false
+    }
+
     buildTypes {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-        }
-    }
-
-    sourceSets {//目录指向配置
-        main {
-            jniLibs.srcDirs = ['libs']//指定lib库目录
         }
     }
 }
@@ -36,6 +48,7 @@ dependencies {
     implementation DESIGN
     implementation 'com.github.bumptech.glide:glide:4.8.0'
     implementation project(path: ':ffmpeg')
+//    implementation 'com.github.kui92:FFmpegLibrary:3.2'
 }
 
 
@@ -48,10 +61,6 @@ buildscript {
         maven {
 //            url '/Users/wjh/work/Learning/repo'
             url '../repo'
-        }
-        repositories {
-            google()
-            jcenter()
         }
     }
     dependencies {
