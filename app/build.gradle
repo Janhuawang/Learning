@@ -1,4 +1,6 @@
 apply plugin: 'com.android.application'
+apply from: "custom.gradle"
+
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion as Integer
     buildToolsVersion rootProject.ext.buildToolsVersion as String
@@ -36,121 +38,32 @@ dependencies {
     implementation project(path: ':ffmpeg')
 }
 
+
 /**
  * 脚本构建块 优先执行
+ * 脚本构建需要先执行 buildscript 脚本，不然找不见：apply plugin: 'PrintPlugin'，放在其它自定义的gradle中会有找不见的问题。
  */
 buildscript {
     repositories {
         maven {
+//            url '/Users/wjh/work/Learning/repo'
             url '../repo'
         }
-
-    }
-    dependencies {
-//        classpath 'com.plugin.custom:PrintPlugin:1.0'  // 拼接方式依赖
-        classpath group: 'com.plugin.custom', name: 'PrintPlugin',   // 分体方式依赖
-                version: '1.0'
-    }
-}
-
-
-/*
-* 第一种方式：在Module中定义
-* 1、给插件传参测试
-* */
-apply plugin: HelloPlugin
-/**
- * 传参
- */
-hellobean {
-    name = '曹操'
-    age = '1'
-}
-/**
- * Bean定义
- */
-class HelloPluginExtension {
-    String name
-    String age
-}
-
-class HelloPlugin implements Plugin<Project> {
-    // 此方法接受一个Project对象
-    void apply(Project project) {
-        System.out.println("========================");
-        System.out.println("自定义Plugin的第一种方式 在我们构建项目的build.gradle脚本中直接编写!");
-
-        // extensions 容器保存了hellobean 的参数，hellobean 为Hellobean的实体
-        project.extensions.create("hellobean", HelloPluginExtension)
-        System.out.println("name=${project.hellobean.name}  age=${project.hellobean.age}");
-
-        System.out.println("========================");
-
-        project.afterEvaluate {
-            println "HelloPlugin.project.afterEvaluate= ${project.hellobean.name} age = ${project.hellobean.age}"
-            // 向project对象添加hello任务
-
-            project.task('hello') {
-                println "Hello from the HelloPlugin name= ${project.hellobean.name} age = ${project.hellobean.age}"
-
-                doFirst{
-                    System.out.println("hello开始");
-                }
-                doLast {
-                    System.out.println("hello结束");
-                }
-            }
-
-            Task a = project.tasks["hello"]
-            a.doFirst{
-                System.out.println("doFirst");
-            }
-            a.doLast{
-                System.out.println("doLast");
-            }
-
-            project.task('hello2',dependsOn:a) {
-                System.out.println("hello2");
-                doFirst{
-                    System.out.println("hello2开始");
-                }
-                doLast {
-                    System.out.println("hello2结束");
-                }
-            }
-
-
-            project.task('hello3') {
-                println "我是Hello3"
-
-                doFirst{
-                    System.out.println("我是Hello3开始");
-                }
-                doLast {
-                    System.out.println("我是Hello3结束");
-                }
-            }
+        repositories {
+            google()
+            jcenter()
         }
     }
-
+    dependencies {
+        classpath 'com.plugin.custom:PrintPlugin:1.0'  // 拼接方式依赖
+//        classpath group: 'com.plugin.custom', name: 'PrintPlugin',   // 分体方式依赖
+//                version: '1.0'
+    }
 }
-
-/**
- * 第二种方式：在buildsrc下的插件可以直接访问到
- * 尝试过了需要有.properties文件的配置才行，不然会找不见
- */
-apply plugin: 'MyPlugin'
-
-/**
- * 使用本地自定义的Task
- */
-task greeting(type: com.test.one.GreetingTask) {
-    greeting = 'another project working!'
-}
-
 
 /**
  * 第三种方式： maven形式依赖 目前配置的是本地库
+ * 其它两种方式见 custom.gradle
  */
 apply plugin: 'PrintPlugin'
 printbean {
@@ -158,3 +71,5 @@ printbean {
     sex '女'
     age '18岁了'
 }
+
+
