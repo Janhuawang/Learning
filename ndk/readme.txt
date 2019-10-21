@@ -12,3 +12,5 @@
 
 5、FFmpeg版本下载地址: http://ffmpeg.org/releases/
    NDK版本下载地址: https://developer.android.com/ndk/downloads/older_releases.html
+
+6、如果有报错的话可查看 ffmpeg-ffbuild-config.log，根据详情日志分析错误。
