@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.os.StatFs;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -622,8 +623,24 @@ public class FileUtil {
         }
     }
 
+    /**
+     * 判断文件是否存在
+     *
+     * @param path 文件路径
+     * @return 文件是否存在
+     */
+    public static boolean checkFileExist(String path) {
+        if (TextUtils.isEmpty(path)) {
+            Log.e("FileUtil", path + "is null!");
+        }
+        File file = new File(path);
+        if (!file.exists()) {
+            Log.e("FileUtil", path + " is not exist!");
+        }
+        return true;
+    }
+
     public interface FileDelCallback {
         void done(List<String> filePathList);
     }
-
 }
