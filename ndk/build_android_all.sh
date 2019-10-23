@@ -97,8 +97,6 @@ build(){
         
     esac #结束
     
-    make clean #清空工作
-    
     CONFIGURATION="$COMMON_OPTIONS"
     CONFIGURATION="$CONFIGURATION --logfile=$CONFIG_LOG_PATH/config_$APP_ABI.log"
     CONFIGURATION="$CONFIGURATION --prefix=$PREFIX"
@@ -115,19 +113,23 @@ build(){
     echo "-------- > CONFIGURATION: ${CONFIGURATION}"
     echo "-------- > EXTRA_LDFLAGS: ${EXTRA_LDFLAGS}"
     echo "-------- > EXTRA_CFLAGS:  ${EXTRA_CFLAGS}"
- 
-    ./configure ${CONFIGURATION} \   #进入脚本
+
+    #进入脚本
+    # EXTRA_CFLAGS: 设置第三方库文件 C库include文件路径 现在会增加log库
+    # EXTRA_LDFLAGS: 设置第三方库文件 库lib文件路径 一些基本库，感觉不用加也可以
+    ./configure ${CONFIGURATION} \
     --extra-cflags="$EXTRA_CFLAGS" \
     --extra-ldflags="$EXTRA_LDFLAGS"
-    
+
+    make clean #清理编译
     make
     make install #开始工作
-    
+
 }
 
 build_all(){
 
-    COMMON_OPTIONS="$COMMON_OPTIONS --target-os=android"
+    COMMON_OPTIONS="$COMMON_OPTIONS --target-os=android" # 设置目标平台的系统
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-static"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-shared"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-protocols"
@@ -136,10 +138,12 @@ build_all(){
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-debug"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-small"
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-doc"
+
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-programs"
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-ffmpeg"
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-ffplay"
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-ffprobe"
+
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-symver"
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-network"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-pthreads"
@@ -158,11 +162,11 @@ build_all(){
 
     mkdir -p ${CONFIG_LOG_PATH} #建立日志文件架
 
-#    build "armeabi-v7a"
-    #build "armeabi"
+    build "armeabi-v7a"
+#    build "armeabi"
     build "arm64-v8a"
-    #build "x86"
-    #build "x86_64"
+#    build "x86"
+#    build "x86_64"
 }
 
 echo "-------- Start --------"
