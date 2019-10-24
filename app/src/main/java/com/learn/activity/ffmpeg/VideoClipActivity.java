@@ -9,7 +9,7 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esay.ffmtool.FfmpegTool;
+//import com.esay.ffmtool.FfmpegTool;
 import com.learn.R;
 import com.learn.base.BaseActivity;
 import com.learn.util.FileUtil;
@@ -38,7 +38,7 @@ public class VideoClipActivity extends BaseActivity {
     /**
      * ffmpeg工具类
      */
-    private FfmpegTool ffmpegTool;
+//    private FfmpegTool ffmpegTool;
     /**
      * 剪切状态
      */
@@ -111,13 +111,13 @@ public class VideoClipActivity extends BaseActivity {
             fileImg.mkdirs();
         }
 
-        ffmpegTool = FfmpegTool.getInstance(this);
+        /*ffmpegTool = FfmpegTool.getInstance(this);
         ffmpegTool.setImageDecodeing(new FfmpegTool.ImageDecodeing() {
             @Override
             public void sucessOne(String s, int i) {
                 ToastUtil.showText("s---" + s);
             }
-        });
+        });*/
 
         runImagDecodTask(0, 5 * IMAGE_NUM);
     }
@@ -127,7 +127,7 @@ public class VideoClipActivity extends BaseActivity {
         super.onClick(v);
         if (R.id.tv_clip == v.getId()) {
             tv_state.setText("裁剪中。。。");
-            executorService.execute(new Runnable() {
+           /* executorService.execute(new Runnable() {
                 @Override
                 public void run() {
                     String video = outPutClipDir + File.separator + "clip" + System.currentTimeMillis() / 1000 + ".mp4";
@@ -142,7 +142,7 @@ public class VideoClipActivity extends BaseActivity {
                         }
                     });
                 }
-            });
+            });*/
         }
     }
 
@@ -153,11 +153,11 @@ public class VideoClipActivity extends BaseActivity {
      * @param count 一共解析多少张
      */
     private void runImagDecodTask(final int start, final int count) {
-        executorService.execute(new Runnable() {
+        /*executorService.execute(new Runnable() {
             @Override
             public void run() {
                 ffmpegTool.decodToImageWithCall(videoPath, outPutImgDir + "/", start, count);
             }
-        });
+        });*/
     }
 }

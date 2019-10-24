@@ -2,7 +2,6 @@ package com.learn.activity.ffmpeg;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
@@ -13,24 +12,25 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.esay.ffmtool.FfmpegTool;
-import com.esay.ffmtool.FfmpegUtil;
+import com.frank.ffmpeglib.FFmpegKit;
+import com.frank.ffmpeglib.FfmpegUtil;
 import com.learn.R;
 import com.learn.activity.ffmpeg.formate.VideoLayout;
+import com.learn.activity.ffmpeg.util.FilePathUtil;
 import com.learn.util.FileUtil;
 import com.learn.util.TimeUtil;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.InputStream;
 
 public class VideoHandleActivity extends AppCompatActivity implements View.OnClickListener {
     private static final String TAG = VideoHandleActivity.class.getSimpleName();
     private static final int MSG_BEGIN = 101;
     private static final int MSG_FINISH = 102;
 
-    private static final String PATH = Environment.getExternalStorageDirectory().getPath() + File.separator + "AvideoTest";
-    private static final String OutDir = PATH + File.separator + "out";
+    private final String PATH = FilePathUtil.PATH;
+    private final String OutDir = FilePathUtil.OutDir;
+
     private ProgressBar progress_video;
     private TextView tv_log;
     private StringBuilder stringBuilder = new StringBuilder();
@@ -72,53 +72,7 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
 
         intView();
 
-        initPath();
-    }
-
-    /**
-     * 初始化路径
-     */
-    private void initPath() {
-        File outFile = new File(OutDir);
-        if (!outFile.exists()) {
-            outFile.mkdirs();
-        }
-
-        File af = new File(PATH + File.separator + "a.mp4");
-        if (!af.isFile()) {
-            try {
-                //InputStream is = this.getResources().openRawResource(R.raw.bjbj);
-                InputStream is = this.getResources().getAssets().open("a.mp4");
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-                FileOutputStream fos = new FileOutputStream(af);
-                fos.write(buffer);
-                fos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        File bf = new File(PATH + File.separator + "b.mp4");
-        if (!bf.isFile()) {
-            try {
-                //InputStream is = this.getResources().openRawResource(R.raw.bjbj);
-                InputStream is = this.getResources().getAssets().open("a.mp4");
-                int size = is.available();
-                byte[] buffer = new byte[size];
-                is.read(buffer);
-                is.close();
-                FileOutputStream fos = new FileOutputStream(bf);
-                fos.write(buffer);
-                fos.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-
-        Toast.makeText(VideoHandleActivity.this, "文件初始完成！", Toast.LENGTH_SHORT).show();
+        FilePathUtil.initPath(this);
     }
 
     private void intView() {
@@ -203,7 +157,7 @@ public class VideoHandleActivity extends AppCompatActivity implements View.OnCli
         if (commandLine == null) {
             return;
         }
-        FfmpegTool.execute(commandLine, new FfmpegTool.OnHandleListener() {
+        FFmpegKit.execute(commandLine, new FFmpegKit.OnHandleListener() {
             @Override
             public void onBegin() {
                 Log.i(TAG, "handle video onBegin...");

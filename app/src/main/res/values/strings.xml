@@ -9,5 +9,10 @@
     <string name="save_to_local">保存到手机</string>
     <string name="see_big_photo">查看图片大图</string>
 
+    <string name="button_protocol">Protocol</string>
+    <string name="button_codec">Codec</string>
+    <string name="button_filter">Filter</string>
+    <string name="button_format">Format</string>
+    <string name="button_play">Play</string>
 
 </resources>

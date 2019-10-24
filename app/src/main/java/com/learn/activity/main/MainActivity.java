@@ -7,6 +7,7 @@ import android.support.v7.widget.RecyclerView;
 
 import com.learn.R;
 import com.learn.activity.dialog.rotating.DialogRotatingActivity;
+import com.learn.activity.ffmpeg.FFPlayerActivity;
 import com.learn.activity.ffmpeg.VideoClipActivity;
 import com.learn.activity.ffmpeg.VideoHandleActivity;
 import com.learn.activity.glidedemo.sample.ZoomActivity;
@@ -39,6 +40,7 @@ public class MainActivity extends AppCompatActivity {
         lists.add(new ItemBean("Zoom", ZoomActivity.class.getName()));
         lists.add(new ItemBean("视频剪辑", VideoClipActivity.class.getName()));
         lists.add(new ItemBean("视频拼接", VideoHandleActivity.class.getName()));
+        lists.add(new ItemBean("视频播放器", FFPlayerActivity.class.getName()));
     }
 
     private void initView() {
