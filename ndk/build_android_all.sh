@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 #参考：https://www.jianshu.com/p/0a7f3175c1b9
+#参考：https://github.com/coopsrc/FFPlayerDemo
 #定义动态参数
 NDK_HOME=/Users/wjh/fast-shell/NDK/android-ndk-r17c
 PREFIX=$(pwd)/android-build
