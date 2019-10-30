@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    >
+    android:layout_height="match_parent">
 
     <ProgressBar
         android:id="@+id/progress_video"
@@ -36,11 +34,25 @@
                 android:layout_marginTop="4dp"
                 android:text="视频拼接" />
 
-            <TextView
-                android:id="@+id/tv_log"
-                android:layout_marginTop="32dp"
+            <Button
+                android:id="@+id/btn_video_cut"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="视频剪切" />
+
+            <Button
+                android:id="@+id/btn_video_frame"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="获取视频帧" />
+
+            <TextView
+                android:id="@+id/tv_log"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
                 android:padding="16dp"
                 android:textColor="#000000"
                 android:textSize="16dp" />

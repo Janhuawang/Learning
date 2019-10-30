@@ -5,7 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.TextView;
 
-import com.frank.ffmpeglib.FFPlayer;
+//import com.frank.ffmpeglib.FFPlayer;
 import com.learn.R;
 import com.learn.activity.ffmpeg.util.FilePathUtil;
 import com.learn.activity.ffmpeg.player.widget.FFVideoView;
@@ -38,16 +38,16 @@ public class FFPlayerActivity extends AppCompatActivity {
 
         switch (id) {
             case R.id.button_protocol:
-                setInfoText(FFPlayer.urlProtocolInfo());
+//                               setInfoText(FFPlayer.urlProtocolInfo());
                 break;
             case R.id.button_codec:
-                setInfoText(FFPlayer.avCodecInfo());
+//                               setInfoText(FFPlayer.avCodecInfo());
                 break;
             case R.id.button_filter:
-                setInfoText(FFPlayer.avFilterInfo());
+//                               setInfoText(FFPlayer.avFilterInfo());
                 break;
             case R.id.button_format:
-                setInfoText(FFPlayer.avFormatInfo());
+//                setInfoText(FFPlayer.avFormatInfo());
                 break;
             case R.id.button_play:
                 String videoPath = PATH + File.separator + "a.mp4";

@@ -103,7 +103,7 @@
 
         <!-- 视频拼接及其他操作 -->
         <activity
-            android:name=".activity.ffmpeg.VideoHandleActivity"
+            android:name=".activity.ffmpeg.VideoCmdActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"
@@ -112,6 +112,14 @@
         <!-- 视频播放器 -->
         <activity
             android:name=".activity.ffmpeg.FFPlayerActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+        <!-- 遍历本地文件 -->
+        <activity
+            android:name=".activity.loadfile.FileListActivity"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
             android:maxAspectRatio="2.4"
             android:screenOrientation="portrait"

@@ -1,0 +1,67 @@
+{
+  "templateInfo": {
+    "templateSetup": {
+      "wxShareTitle": "",
+      "wxShareDesc": "",
+      "type_name": "",
+      "wx_share_title": "",
+      "wx_share_desc": "",
+      "typeName": "",
+      "allow_speak": "1",
+      "allowSpeak": "1",
+      "show_online_count": "1",
+      "showOnlineCount": "1",
+      "live_clarity": "1",
+      "liveClarity": "1",
+      "live_type": "1",
+      "liveType": "1",
+      "mobile_direction": "2",
+      "mobileDirection": "2",
+      "screen_display_content": "1",
+      "screenDisplayContent": "1",
+      "start_ts": "0",
+      "startTs": "0",
+      "show_video": "1",
+      "showVideo": "1",
+      "show_audio": "1",
+      "showAudio": "1",
+      "serverTime": 1571404267
+    },
+    "templateName": "直播一个",
+    "sessionTitle": "直播2",
+    "templateStatus": "0",
+    "autoCheck": "1",
+    "teacherId": "11318",
+    "sessionType": "18",
+    "templateUseCount": "0",
+    "resultType": "0",
+    "desc": "",
+    "multimedia_id": "0",
+    "multimedia_type": "0",
+    "is_require": "1",
+    "point_ratio": "0.00",
+    "tags": []
+  },
+  "questionArr": [],
+  "sectionArr": [],
+  "extendData": {
+    "resource_arr": [
+      {
+        "id": 10837,
+        "obj_type": 1,
+        "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571394407.1295.61719.jpg",
+        "live_resource_id": 0,
+        "index": 1,
+        "display_status": 1
+      },
+      {
+        "id": 10838,
+        "obj_type": 1,
+        "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571394407.1305.39576.jpg",
+        "live_resource_id": 0,
+        "index": 2,
+        "display_status": 1
+      }
+    ]
+  }
+}

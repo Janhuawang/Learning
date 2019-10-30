@@ -9,7 +9,7 @@ import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceView;
 
-import com.frank.ffmpeglib.FFPlayer;
+//import com.frank.ffmpeglib.FFPlayer;
 
 
 /*
@@ -55,7 +55,7 @@ public class FFVideoView extends SurfaceView {
             @Override
             public void run() {
                 Log.d("FFVideoView", "run: playVideo");
-                FFPlayer.playVideo(videoPath, mSurface);
+//                FFPlayer.playVideo(videoPath, mSurface);
             }
         }).start();
     }

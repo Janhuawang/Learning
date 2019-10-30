@@ -3,7 +3,7 @@ package com.frank.ffmpeglib;
 import android.view.Surface;
 
 /**
- * 播放器
+ * 播放器  看能参考吗：https://www.jianshu.com/p/c7de148e951c
  * 作者：wjh on 2019-10-24 22:00
  */
 public class FFPlayer {

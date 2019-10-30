@@ -67,5 +67,10 @@
     <external-path
         name="beta_external_files_path"
         path="Android/data/" />
+
+    <!--/storage/emulated/0/tbs/-->
+    <external-path
+        name="file_load_test"
+        path="tbs/" />
 </paths>
 

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 #参考：https://www.jianshu.com/p/0a7f3175c1b9
 #参考：https://github.com/coopsrc/FFPlayerDemo
+
 #定义动态参数
 NDK_HOME=/Users/wjh/fast-shell/NDK/android-ndk-r17c
 PREFIX=$(pwd)/android-build
@@ -16,7 +17,7 @@ build(){
     APP_ABI=$1 #入参
     echo "======== > Start build $APP_ABI"
     case $APP_ABI in #开始
-    
+
         armeabi )
             ARCH="arm"
             CPU="armv6"
@@ -32,7 +33,7 @@ build(){
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-rpath-link=$SYSROOT/usr/lib -L$SYSROOT/usr/lib"
             EXTRA_OPTIONS="--disable-x86asm"
         ;;
-        
+
         armeabi-v7a )
             ARCH="arm"
             CPU="armv7-a"
@@ -49,7 +50,7 @@ build(){
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-rpath-link=$SYSROOT/usr/lib -L$SYSROOT/usr/lib"
             EXTRA_OPTIONS="--enable-neon --disable-x86asm"
         ;;
-        
+
         arm64-v8a )
             ARCH="aarch64"
             CPU="armv8-a"
@@ -64,7 +65,7 @@ build(){
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-rpath-link=$SYSROOT/usr/lib -L$SYSROOT/usr/lib"
             EXTRA_OPTIONS="--enable-neon --disable-x86asm"
         ;;
-        
+
         x86 )
             ARCH="x86"
             CPU="i686"
@@ -79,7 +80,7 @@ build(){
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-rpath-link=$SYSROOT/usr/lib -L$SYSROOT/usr/lib"
             EXTRA_OPTIONS="--disable-asm"
         ;;
-        
+
         x86_64 )
             ARCH="x86_64"
             CPU="x86_64"
@@ -95,9 +96,9 @@ build(){
             EXTRA_LDFLAGS="$EXTRA_LDFLAGS -Wl,-rpath-link=$SYSROOT/usr/lib64 -L$SYSROOT/usr/lib64"
             EXTRA_OPTIONS="--disable-asm"
         ;;
-        
+
     esac #结束
-    
+
     CONFIGURATION="$COMMON_OPTIONS"
     CONFIGURATION="$CONFIGURATION --logfile=$CONFIG_LOG_PATH/config_$APP_ABI.log"
     CONFIGURATION="$CONFIGURATION --prefix=$PREFIX"
@@ -110,7 +111,7 @@ build(){
     CONFIGURATION="$CONFIGURATION --sysroot=$SYSROOT"
     CONFIGURATION="$CONFIGURATION --extra-ldexeflags=-pie"
     CONFIGURATION="$CONFIGURATION $EXTRA_OPTIONS"
-  
+
     echo "-------- > CONFIGURATION: ${CONFIGURATION}"
     echo "-------- > EXTRA_LDFLAGS: ${EXTRA_LDFLAGS}"
     echo "-------- > EXTRA_CFLAGS:  ${EXTRA_CFLAGS}"
@@ -133,6 +134,10 @@ build_all(){
     COMMON_OPTIONS="$COMMON_OPTIONS --target-os=android" # 设置目标平台的系统
     COMMON_OPTIONS="$COMMON_OPTIONS --disable-static"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-shared"
+
+    COMMON_OPTIONS="$COMMON_OPTIONS --enable-postproc"  # 增加libpostproc库
+    COMMON_OPTIONS="$COMMON_OPTIONS --enable-gpl"
+
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-protocols"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-cross-compile"
     COMMON_OPTIONS="$COMMON_OPTIONS --enable-optimizations"
@@ -165,7 +170,7 @@ build_all(){
 
     build "armeabi-v7a"
 #    build "armeabi"
-    build "arm64-v8a"
+#    build "arm64-v8a"
 #    build "x86"
 #    build "x86_64"
 }
