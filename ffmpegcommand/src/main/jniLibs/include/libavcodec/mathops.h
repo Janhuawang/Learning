@@ -36,7 +36,7 @@ extern const uint8_t ff_zigzag_direct[64];
 extern const uint8_t ff_zigzag_scan[16 + 1];
 
 
-#if   ARCH_ARM
+/*#if   ARCH_ARM
 #   include "arm64/mathops.h"
 #elif ARCH_AVR32
 #   include "avr32/mathops.h"
@@ -46,7 +46,7 @@ extern const uint8_t ff_zigzag_scan[16 + 1];
 #   include "ppc/mathops.h"
 #elif ARCH_X86
 #   include "x86/mathops.h"
-#endif
+#endif*/
 
 /* generic implementation */
 
