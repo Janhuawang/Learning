@@ -13,15 +13,15 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        externalNativeBuild {
-            cmake {
-                cppFlags "-frtti -fexceptions"
-                abiFilters 'armeabi-v7a', 'arm64-v8a'
-//                arguments "-DANDROID_STL=c++_shared"
-            }
-        }
+//        externalNativeBuild {
+//            cmake {
+//                cppFlags "-frtti -fexceptions"
+//                abiFilters 'armeabi-v7a', 'arm64-v8a'
+//                //arguments "-DANDROID_STL=c++_shared"
+//            }
+//        }
 
-        ndk { abiFilters "armeabi-v7a", 'arm64-v8a' }
+//        ndk { abiFilters 'armeabi-v7a' }
 
     }
 

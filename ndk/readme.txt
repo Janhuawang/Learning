@@ -10,7 +10,7 @@
 4、.c文件的函数名需要与java中native方法对应上，不然会找不到。
 名字为:包名_类名_方法名，例如：com.java.util下的a.class中的方法toB(),com_java_util_a_toB()。
 
-5、FFmpeg版本下载地址: http://ffmpeg.org/releases/
+5、FFMpeg版本下载地址: http://ffmpeg.org/releases/
    NDK版本下载地址: https://developer.android.com/ndk/downloads/older_releases.html
 
 6、如果有报错的话可查看 ffmpeg-ffbuild-config.log，根据详情日志分析错误。
