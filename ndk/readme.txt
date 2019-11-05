@@ -14,3 +14,19 @@
    NDK版本下载地址: https://developer.android.com/ndk/downloads/older_releases.html
 
 6、如果有报错的话可查看 ffmpeg-ffbuild-config.log，根据详情日志分析错误。
+
+
+7、同样的脚本在低版本上编译不过：
+参考地址：https://blog.csdn.net/jjwwmlp456/article/details/79614943
+打开文件 ./configure
+修改：
+SLIBNAME_WITH_MAJOR='$(SLIBNAME).$(LIBMAJOR)'
+LIB_INSTALL_EXTRA_CMD='$$(RANLIB) "$(LIBDIR)/$(LIBNAME)"'
+SLIB_INSTALL_NAME='$(SLIBNAME_WITH_VERSION)'
+SLIB_INSTALL_LINKS='$(SLIBNAME_WITH_MAJOR) $(SLIBNAME)'
+
+改成：
+SLIBNAME_WITH_MAJOR='$(SLIBPREF)$(FULLNAME)-$(LIBMAJOR)$(SLIBSUF)'
+LIB_INSTALL_EXTRA_CMD='$$(RANLIB)"$(LIBDIR)/$(LIBNAME)"'
+SLIB_INSTALL_NAME='$(SLIBNAME_WITH_MAJOR)'
+SLIB_INSTALL_LINKS='$(SLIBNAME)'

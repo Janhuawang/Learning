@@ -107,9 +107,9 @@ target_link_libraries( # 多库之间链接
         libavfilter
         libavformat
         libavutil
+        libpostproc
         libswresample
         libswscale
-        libpostproc
 
         ${log-lib}
         ${android-lib}
