@@ -42,4 +42,20 @@ public class UriUtil {
         return fileUri;
     }
 
+
+    /**
+     * 判断url是否是本地目录
+     *
+     * @param url
+     * @return
+     */
+    public static boolean isLocalUrl(String url) {
+        if (url != null) {
+            if (url.startsWith("/")) {
+                return true;
+            } else return !url.startsWith("http");
+        }
+        return true;
+    }
+
 }

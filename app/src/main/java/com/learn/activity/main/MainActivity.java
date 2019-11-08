@@ -15,6 +15,7 @@ import com.learn.activity.dialog.rotating.DialogRotatingActivity;
 import com.learn.activity.ffmpeg.FFPlayerActivity;
 import com.learn.activity.ffmpeg.VideoClipActivity;
 import com.learn.activity.ffmpeg.VideoCmdActivity;
+import com.learn.activity.ffmpeg.VideoFrameActivity;
 import com.learn.activity.glidedemo.sample.ZoomActivity;
 import com.learn.activity.loadfile.FileListActivity;
 import com.learn.activity.thread.AsyncTaskActivity;
@@ -71,6 +72,7 @@ public class MainActivity extends AppCompatActivity {
         lists.add(new ItemBean("ffmpeg命令行", VideoCmdActivity.class.getName()));
         lists.add(new ItemBean("ffmpeg播放器", FFPlayerActivity.class.getName()));
         lists.add(new ItemBean("遍历本地文件", FileListActivity.class.getName()));
+        lists.add(new ItemBean("获取视频帧", VideoFrameActivity.class.getName()));
 
         initView();
     }

@@ -125,6 +125,15 @@
             android:screenOrientation="portrait"
             android:windowSoftInputMode="stateHidden" />
 
+        <!-- 获取视频帧 -->
+        <activity
+            android:name=".activity.ffmpeg.VideoFrameActivity"
+            android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode"
+            android:maxAspectRatio="2.4"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+
+
     </application>
 
 </manifest>

@@ -25,6 +25,27 @@ import java.util.List;
  */
 public class FileUtil {
     /**
+     * 获取缺省的图片缓存目录，不在相册中显示，短时间保存
+     *
+     * @param context
+     * @return
+     */
+    @NonNull
+    public static String getCacheImgDirPath(Context context) {
+        return getCacheDirPath(context, Environment.DIRECTORY_PICTURES);
+    }
+
+    /**
+     * 获取缺省的图片缓存文件地址，不在相册中显示，短时间保存
+     *
+     * @param context
+     * @return
+     */
+    public static String getDefaultCacheImgPath(Context context) {
+        return getCacheImgDirPath(context).concat(File.separator).concat(TimeUtil.getSaveFileTime(System.currentTimeMillis()));
+    }
+
+    /**
      * 获取系统外部存储根目录
      *
      * @return
@@ -511,21 +532,6 @@ public class FileUtil {
             }
         }
         return false;
-    }
-
-    /**
-     * 判断url是否是本地目录
-     *
-     * @param url
-     * @return
-     */
-    public static boolean isLocalUrl(String url) {
-        if (url != null) {
-            if (url.startsWith("/")) {
-                return true;
-            } else return !url.startsWith("http");
-        }
-        return true;
     }
 
     /**
