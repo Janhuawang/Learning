@@ -139,13 +139,17 @@ public class FFmpegUtil {
      * @param srcFile    源文件
      * @param startTime  剪切的开始时间(单位为秒)
      * @param duration   剪切时长(单位为秒)
-     * @param targetFile 目标文件
+     * @param output 目标文件
      * @return 剪切后的文件
      */
     @SuppressLint("DefaultLocale")
-    public static String[] cutVideo(String srcFile, int startTime, int duration, String targetFile) {
-        String cutVideoCmd = "ffmpeg -i %s -ss %d -t %d %s";
-        cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, targetFile);
+    public static String[] cutVideo(String srcFile, int startTime, int duration, String output) {
+        /*String cutVideoCmd = "ffmpeg -i %s -ss %d -t %d %s";
+        cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, targetFile);*/
+
+        String cutVideoCmd = "ffmpeg -ss %d -i %s -t %d -c copy -copyts %s";
+        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 

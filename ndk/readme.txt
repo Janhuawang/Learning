@@ -33,10 +33,24 @@ SLIB_INSTALL_LINKS='$(SLIBNAME)'
 
 
 8、FFMPEG从功能上划分为几个模块，分别为核心工具（libutils）、媒体格式（libavformat）、编解码（libavcodec）、设备（libavdevice）和后处理（libavfilter, libswscale, libpostproc），分别负责提供公用的功能函数、实现多媒体文件的读包和写包、完成音视频的编解码、管理音视频设备的操作以及进行音视频后处理。
-1、libavutil 是一个包含简化编程功能的库，其中包括随机数生成器，数据结构，数学代码，核心多媒体工具等更多东西。
-2、libavcodec 是一个包含音频/视频解码器和编码器的库。
-3、libavformat 是一个包含了多媒体格式的分离器和混流器的库。
-4、libavdevice 是一个包含输入输出设备的库，用于捕捉和渲染很多来自常用的多媒体输入/输出软件框架的数据，包括Video4Linux，Video4Linux2，VfW和ALSA。
-5、libavfilter 是一个包含媒体过滤器的库。AVFilter可以给视音频添加各种滤镜效果。可以给视频添加水印，给YUV数据加特效。
-6、libswscale 是一个用于执行高度优化的图像缩放和颜色空间/像素格式转换操作的库。
-7、libswresample 是一个用于执行高度优化的音频重采样，重新矩阵和取样格式转换操作的库。
+    1.libavutil 是一个包含简化编程功能的库，其中包括随机数生成器，数据结构，数学代码，核心多媒体工具等更多东西。
+    2.libavcodec 是一个包含音频/视频解码器和编码器的库。
+    3.libavformat 是一个包含了多媒体格式的分离器和混流器的库。
+    4.libavdevice 是一个包含输入输出设备的库，用于捕捉和渲染很多来自常用的多媒体输入/输出软件框架的数据，包括Video4Linux，Video4Linux2，VfW和ALSA。
+    5.libavfilter 是一个包含媒体过滤器的库。AVFilter可以给视音频添加各种滤镜效果。可以给视频添加水印，给YUV数据加特效。
+    6.libswscale 是一个用于执行高度优化的图像缩放和颜色空间/像素格式转换操作的库。
+    7.libswresample 是一个用于执行高度优化的音频重采样，重新矩阵和取样格式转换操作的库。
+
+
+9、参考https://www.ihubin.com/blog/android-ffmpeg-demo-4/ 步骤：
+    Step1拷贝文件：
+    1. 将编译FFmpeg成一个SO库生成的 libffmpeg.so 文件拷贝至 jni 目录.
+    2. 复制FFmpeg源码文件 ffmpeg.h, ffmpeg.c, ffmpeg_opt.c, ffmpeg_filter.c，cmdutils.c, cmdutils.h, cmdutils_common_opts.h 到jni目录下.
+
+    Step2代码实现：
+    1. 找到ffmpeg.c，把int main(int argc, char argv) 改名为 int run(int argc, char argv)
+       找到ffmpeg.h, 在文件末尾添加函数申明: int run(int argc, char **argv);
+    2. 找到cmdutils.c中的exit_program函数，删掉函数中原来的内容, 添加 return ret；并修改函数的返回类型为int
+
+10、FFMpeg从头到尾的参考地址：https://github.com/bigsen/FFmpeg_iOS
+

@@ -23,11 +23,11 @@ add_library( # Sets the name of the library.
         SHARED
 
         # Provides a relative path to your source file(s).
-        ${JNI_LIBS_DIR}/include/ffmpeg/cmdutils.c
-        ${JNI_LIBS_DIR}/include/ffmpeg/ffmpeg.c
-        ${JNI_LIBS_DIR}/include/ffmpeg/ffmpeg_filter.c
-        ${JNI_LIBS_DIR}/include/ffmpeg/ffmpeg_opt.c
-        src/main/cpp/ffmpeg_cmd.c
+        ${JNI_LIBS_DIR}/include/ffmpegc/cmdutils.c
+        ${JNI_LIBS_DIR}/include/ffmpegc/ffmpeg.c
+        ${JNI_LIBS_DIR}/include/ffmpegc/ffmpeg_filter.c
+        ${JNI_LIBS_DIR}/include/ffmpegc/ffmpeg_opt.c
+        src/main/cpp/ffmpeg_main.c
         )
 
 add_library(libavcodec
@@ -72,12 +72,12 @@ set_target_properties(libavutil
         PROPERTIES IMPORTED_LOCATION
         ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavutil.so)
 
-add_library(libpostproc
-        SHARED
-        IMPORTED)
-set_target_properties(libpostproc
-        PROPERTIES IMPORTED_LOCATION
-        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libpostproc.so)
+#add_library(libpostproc
+#        SHARED
+#        IMPORTED)
+#set_target_properties(libpostproc
+#        PROPERTIES IMPORTED_LOCATION
+#        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libpostproc.so)
 
 add_library(libswresample
         SHARED
@@ -108,7 +108,7 @@ target_link_libraries( # 多库之间链接
         libavformat
 #        libavresample
         libavutil
-        libpostproc
+#        libpostproc
         libswresample
         libswscale
 
