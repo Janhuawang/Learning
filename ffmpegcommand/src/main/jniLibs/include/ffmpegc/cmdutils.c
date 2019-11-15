@@ -123,6 +123,12 @@ void register_exit(void (*cb)(int ret))
 
 int exit_program(int ret)
 {
+
+//    if (program_exit)
+//        program_exit(ret);
+
+//    pthread_exit("all thread");
+
     return ret;
 }
 

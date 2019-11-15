@@ -54,3 +54,7 @@ SLIB_INSTALL_LINKS='$(SLIBNAME)'
 
 10、FFMpeg从头到尾的参考地址：https://github.com/bigsen/FFmpeg_iOS
 
+11、解决指令执行只有第一次生效 需要注释部分代码: https://www.jianshu.com/p/e8727f01cc6b, https://blog.csdn.net/liu3364575/article/details/78410203
+
+12、Demo参考：https://www.jianshu.com/p/e8727f01cc6b ，https://github.com/xch168/VideoEditor
+
