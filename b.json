@@ -1,62 +1,23 @@
-[
-  {
-    "id": 10837,
-    "obj_type": 1,
-    "index": 1,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571394407.1295.61719.jpg",
-    "live_resource_id": 0
-  },
-  {
-    "id": 10838,
-    "obj_type": 1,
-    "index": 2,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571394407.1305.39576.jpg",
-    "live_resource_id": 0
+{
+  "resource_data": {
+    "id": 11843,
+    "resource_id": 11843,
+    "file_name": "1574138179.8301.24546.11297.mp4",
+    "file_duration": "0",
+    "url": "http:\/\/umu-pd.bj.bcebos.com\/videoweike\/teacher\/weike\/2Wy73fa\/transcoding\/1574138179.8301.24546.11297.mp4",
+    "transcoding_url": "http:\/\/umu-pd.bj.bcebos.com\/videoweike\/teacher\/weike\/2Wy73fa\/transcoding\/1574152340.0039.86757.clip.mp4",
+    "transcoding_ext": "mp4",
+    "thumb_info": [
+      "https:\/\/umu-pd.bj.bcebos.com\/\/videoweike\/teacher\/weike\/2Wy73fa\/thumbnail\/1574138179.8301.24546.11297.mp4_00012.jpg",
+      "https:\/\/umu-pd.bj.bcebos.com\/\/videoweike\/teacher\/weike\/2Wy73fa\/thumbnail\/1574138179.8301.24546.11297.mp4_00036.jpg",
+      "https:\/\/umu-pd.bj.bcebos.com\/\/videoweike\/teacher\/weike\/2Wy73fa\/thumbnail\/1574138179.8301.24546.11297.mp4_00060.jpg"
+    ],
+    "status": "wait_transcoding",
+    "is_recycle": 0,
+    "is_deleted": 0,
+    "is_live": 0,
+    "live_session_status": "READY",
+    "create_time": 1574139388,
+    "resource_type": 1
   }
-]
-
-[
-  {
-    "id": 0,
-    "obj_type": 1,
-    "index": 1,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571414320.6224.44458.jpg",
-    "live_resource_id": 0
-  },
-  {
-    "id": 0,
-    "obj_type": 1,
-    "index": 2,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571414320.6224.45147.jpg",
-    "live_resource_id": 0
-  }
-]
-
-[
-  {
-    "id": 10839,
-    "obj_type": 1,
-    "index": 1,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571414320.6224.44458.jpg",
-    "live_resource_id": 0
-  },
-  {
-    "id": 10840,
-    "obj_type": 1,
-    "index": 2,
-    "display_status": 1,
-    "delete_status": 0,
-    "pic_url": "https:\/\/umu-pd.bj.bcebos.com\/imageweike\/teacher\/photo\/2Wy73fa\/1571414320.6224.45147.jpg",
-    "live_resource_id": 0
-  }
-]
+}
