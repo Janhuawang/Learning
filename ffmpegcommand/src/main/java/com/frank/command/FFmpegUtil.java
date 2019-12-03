@@ -153,6 +153,14 @@ public class FFmpegUtil {
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 
+    public static String[] getFrameTimeList(String srcFile,String output) {
+        String cutVideoCmd;
+//        cutVideoCmd = "ffprobe -select_streams v -skip_frame nokey -show_frames -show_entries frame=pkt_pts_time,pict_type %s > %s";
+        cutVideoCmd = "ffprobe -select_streams v -show_frames %s";
+        cutVideoCmd = String.format(cutVideoCmd, srcFile);
+        return cutVideoCmd.split(" ");//以空格分割为字符串数组
+    }
+
     /**
      * 使用ffmpeg命令行进行视频截图
      *

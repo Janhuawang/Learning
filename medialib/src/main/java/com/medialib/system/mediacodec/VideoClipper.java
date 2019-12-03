@@ -65,7 +65,6 @@ public class VideoClipper {
         @Override
         public void run() {
             mVideoExtractor.selectTrack(videoTrackIndex);
-
             long firstVideoTime = mVideoExtractor.getSampleTime();
             mVideoExtractor.seekTo(firstVideoTime + startPosition, SEEK_TO_PREVIOUS_SYNC);
             Log.e("hero", "_____videoCliper------run");

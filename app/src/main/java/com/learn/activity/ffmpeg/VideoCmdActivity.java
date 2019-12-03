@@ -207,7 +207,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 String input2 = PATH + File.separator + "b.mp4";
                 String output = OutDir + File.separator + "abConcat.mp4";
 
-                /*File concatFile = new File(OutDir + File.separator + "fileList.txt");
+                File concatFile = new File(OutDir + File.separator + "fileList.txt");
                 try {
                     FileOutputStream fileOutputStream = new FileOutputStream(concatFile);
                     fileOutputStream.write(("file \'" + input1 + "\'").getBytes());
@@ -218,13 +218,13 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-                String[] commandLine = FFmpegUtil.concatVideo(concatFile.getAbsolutePath(), output);*/
+                String[] commandLine = FFmpegUtil.concatVideo(concatFile.getAbsolutePath(), output);
 
-                List<String> vList = new ArrayList<>();
-                vList.add(input1);
-                vList.add(input2);
-
-                String[] commandLine = FFmpegUtil.concatVideo(vList, output);
+//                List<String> vList = new ArrayList<>();
+//                vList.add(input1);
+//                vList.add(input2);
+//
+//                String[] commandLine = FFmpegUtil.concatVideo(vList, output);
                 executeFFmpegCmd(commandLine);
                 break;
             }
@@ -243,8 +243,8 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 String output = OutDir + File.separator + "cut.mp4";
                 int startTime = 2;
                 int duration = 24;
-
                 String[] commandLine = FFmpegUtil.cutVideo(srcFile, startTime, duration, output);
+
                 executeFFmpegCmd(commandLine);
                 break;
         }
