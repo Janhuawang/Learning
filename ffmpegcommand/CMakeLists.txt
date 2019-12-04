@@ -58,12 +58,12 @@ set_target_properties(libavformat
         PROPERTIES IMPORTED_LOCATION
         ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavformat.so)
 
-#add_library(libavresample
-#        SHARED
-#        IMPORTED)
-#set_target_properties(libavresample
-#        PROPERTIES IMPORTED_LOCATION
-#        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavresample.so)
+add_library(libavresample
+        SHARED
+        IMPORTED)
+set_target_properties(libavresample
+        PROPERTIES IMPORTED_LOCATION
+        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavresample.so)
 
 add_library(libavutil
         SHARED
@@ -72,12 +72,12 @@ set_target_properties(libavutil
         PROPERTIES IMPORTED_LOCATION
         ${JNI_LIBS_DIR}/${ANDROID_ABI}/libavutil.so)
 
-#add_library(libpostproc
-#        SHARED
-#        IMPORTED)
-#set_target_properties(libpostproc
-#        PROPERTIES IMPORTED_LOCATION
-#        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libpostproc.so)
+add_library(libpostproc
+        SHARED
+        IMPORTED)
+set_target_properties(libpostproc
+        PROPERTIES IMPORTED_LOCATION
+        ${JNI_LIBS_DIR}/${ANDROID_ABI}/libpostproc.so)
 
 add_library(libswresample
         SHARED
@@ -106,9 +106,9 @@ target_link_libraries( # 多库之间链接
         libavdevice
         libavfilter
         libavformat
-#        libavresample
+        libavresample
         libavutil
-#        libpostproc
+        libpostproc
         libswresample
         libswscale
 

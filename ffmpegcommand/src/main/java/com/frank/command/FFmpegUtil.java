@@ -136,10 +136,10 @@ public class FFmpegUtil {
     /**
      * 使用ffmpeg命令行进行视频剪切
      *
-     * @param srcFile    源文件
-     * @param startTime  剪切的开始时间(单位为秒)
-     * @param duration   剪切时长(单位为秒)
-     * @param output 目标文件
+     * @param srcFile   源文件
+     * @param startTime 剪切的开始时间(单位为秒)
+     * @param duration  剪切时长(单位为秒)
+     * @param output    目标文件
      * @return 剪切后的文件
      */
     @SuppressLint("DefaultLocale")
@@ -147,13 +147,22 @@ public class FFmpegUtil {
         /*String cutVideoCmd = "ffmpeg -i %s -ss %d -t %d %s";
         cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, targetFile);*/
 
-        String cutVideoCmd = "ffmpeg -ss %d -i %s -t %d -c copy -copyts %s";
-        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+        String cutVideoCmd = "ffmpeg -d -ss %d -t %d -accurate_seek -i %s -codec copy %s"; // 新的非关键帧精确时间
+        cutVideoCmd = String.format(cutVideoCmd, startTime, duration, srcFile, output);
+
+//        String cutVideoCmd = "ffmpeg -ss %d -i %s -t %d -c copy -copyts %s";
+//        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
 
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 
-    public static String[] getFrameTimeList(String srcFile,String output) {
+    public static String[] cutVideoX264(String srcFile, String startTime, String duration, String output) {
+        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -to %s -c:a copy %s";
+        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+        return cutVideoCmd.split(" ");//以空格分割为字符串数组
+    }
+
+    public static String[] getFrameTimeList(String srcFile, String output) {
         String cutVideoCmd;
 //        cutVideoCmd = "ffprobe -select_streams v -skip_frame nokey -show_frames -show_entries frame=pkt_pts_time,pict_type %s > %s";
         cutVideoCmd = "ffprobe -select_streams v -show_frames %s";

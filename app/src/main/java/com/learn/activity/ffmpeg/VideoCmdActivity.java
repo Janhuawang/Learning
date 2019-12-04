@@ -23,8 +23,6 @@ import com.learn.util.TimeUtil;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * 命令行
@@ -243,7 +241,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 String output = OutDir + File.separator + "cut.mp4";
                 int startTime = 2;
                 int duration = 24;
-                String[] commandLine = FFmpegUtil.cutVideo(srcFile, startTime, duration, output);
+                String[] commandLine = FFmpegUtil.cutVideoX264(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(duration), output);
 
                 executeFFmpegCmd(commandLine);
                 break;
