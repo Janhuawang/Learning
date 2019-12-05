@@ -4891,10 +4891,8 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
     if (level <= AV_LOG_WARNING) {
         __android_log_write(ANDROID_LOG_ERROR, "callback", line);
     } else {
-        __android_log_write(ANDROID_LOG_DEBUG, "callback", line);
-//        __android_log_vprint(ANDROID_LOG_ERROR, "callback", fmt, vl);
+        __android_log_vprint(ANDROID_LOG_ERROR, "callback", fmt, vl);
     }
-
 }
 
 int ffmpeg_main(int argc, char **argv) {

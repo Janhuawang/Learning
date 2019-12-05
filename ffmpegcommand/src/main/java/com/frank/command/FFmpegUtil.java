@@ -157,9 +157,60 @@ public class FFmpegUtil {
     }
 
     public static String[] cutVideoX264(String srcFile, String startTime, String duration, String output) {
-        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -to %s -c:a copy %s";
-        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
+//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
+//        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+
+        String cutVideoCmd = "ffmpeg -d -i %s -ss %s -to %s -c:v libx264 -c:a aac -strict experimental %s";
+        cutVideoCmd = String.format(cutVideoCmd,srcFile, startTime,  duration, output);
+
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
+    }
+
+    public static String[] cutVideoCopyts(String srcFile, String startTime, String duration, String output) {
+        String cutVideoCmd;
+        cutVideoCmd = "ffmpeg -d -i %s -ss %s -to %s -c copy -copyts %s"; // 关键帧技术 copyts关键帧精确
+        cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, output);
+
+        return cutVideoCmd.split(" ");//以空格分割为字符串数组
+    }
+
+    public static String[] cutVideoX264Nmber(String srcFile, int startTime, int duration, String output) {
+//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
+//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
+        String cutVideoCmd = "ffmpeg -i %s -ss %d -t %d -c:v libx264 -c:a aac -strict experimental %s";
+        cutVideoCmd = String.format(cutVideoCmd,srcFile, startTime,  duration, output);
+//        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
+        return cutVideoCmd.split(" ");//以空格分割为字符串数组
+    }
+
+    /*
+     * 非常准确
+     * 非常耗时
+     * 画面清晰
+     * 让每一帧都成为关键帧，即由原来的帧间编码转换为帧内编码再进行裁剪，这样可以裁剪任意时间点，不受关键帧影响
+     * */
+    @SuppressLint("DefaultLocale")
+    public static String[] cutVideoS6(String srcFile, int startTime, int duration, String output) {
+        String cutVideoCmd = "ffmpeg -d -i %s -ss %d -t %d -strict -2 -qscale 0 -intra %s";
+        cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, output);
+        return cutVideoCmd.split(" ");//以空格分割为字符串数组;
+    }
+
+    /**
+     * 速度快、时间准确、短视频会有黑屏现象
+     *
+     * @param src
+     * @param startTime
+     * @param duration
+     * @param dst
+     * @return
+     */
+    public static String[] clipVideoS10(final String src, int startTime, int duration, final String dst) {
+        String cmd = String.format("ffmpeg -d -y -ss " + startTime + " -t " + duration +
+                " -i " + src + " -vcodec copy -acodec copy -strict -2 " + dst);
+        String regulation = "[ \\t]+";
+        return cmd.split(regulation);
     }
 
     public static String[] getFrameTimeList(String srcFile, String output) {

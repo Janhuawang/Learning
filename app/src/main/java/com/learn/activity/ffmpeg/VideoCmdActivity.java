@@ -233,15 +233,17 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
             case R.id.btn_video_cut:
 //                String srcFile = PATH + File.separator + "a.mp4";
 //                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20190717_220948176.mp4";
-                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20191107_213834608.mp4";
+//                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20191107_213834608.mp4";
+                String srcFile = "/storage/emulated/0/aaaa/a.mp4";
 
                 if (!FileUtil.checkFileExist(srcFile)) {
                     return;
                 }
-                String output = OutDir + File.separator + "cut.mp4";
-                int startTime = 2;
-                int duration = 24;
-                String[] commandLine = FFmpegUtil.cutVideoX264(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(duration), output);
+                String output = OutDir + File.separator + "cutA.mp4";
+                int startTime = 1;
+                int duration = 13;
+//                String[] commandLine = FFmpegUtil.cutVideoCopyts(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(startTime+duration), output);
+                String[] commandLine = FFmpegUtil.cutVideoS6(srcFile, startTime, duration, output);
 
                 executeFFmpegCmd(commandLine);
                 break;
