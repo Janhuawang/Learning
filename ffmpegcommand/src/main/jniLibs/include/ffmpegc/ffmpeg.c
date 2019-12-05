@@ -107,7 +107,6 @@
 #include "cmdutils.h"
 
 #include "libavutil/avassert.h"
-#include "../../../../../../../../Library/Android/sdk/ndk-bundle/sysroot/usr/include/android/log.h"
 #include "../../../cpp/ffmpeg_main.h"
 
 const char program_name[] = "ffmpeg";
@@ -4889,13 +4888,7 @@ static void log_callback_null(void *ptr, int level, const char *fmt, va_list vl)
     static int is_atty;
     av_log_format_line(ptr, level, fmt, vl, line, sizeof(line), &print_prefix);
     strcpy(prev, line);
-    if (level <= AV_LOG_WARNING) {
-        __android_log_write(ANDROID_LOG_ERROR, "callback", line);
-    } else {
-        callJavaMethod(line);
-//        __android_log_vprint(ANDROID_LOG_ERROR, "callback", fmt, vl);
-    }
-
+    callJavaMethod(line,level);
 }
 
 int ffmpeg_main(int argc, char **argv) {
@@ -4983,6 +4976,8 @@ int ffmpeg_main(int argc, char **argv) {
         av_log(NULL, AV_LOG_FATAL, "exit_program(main_return_code) \n");
     }
 
+    onDone();
+    clear();
     ffmpeg_cleanup(0);
 
     return main_return_code;
