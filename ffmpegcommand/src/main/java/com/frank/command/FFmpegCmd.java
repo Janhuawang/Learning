@@ -1,14 +1,10 @@
 package com.frank.command;
 
-import android.text.TextUtils;
 import android.util.Log;
-
-import java.math.BigDecimal;
-import java.math.BigInteger;
 
 public class FFmpegCmd {
     /*裁剪类型*/
-    public static final int BUSINESS_TYPE_CUT = 1;
+    private static final int BUSINESS_TYPE_CUT = 1;
     /**
      * 回调
      */
@@ -19,7 +15,7 @@ public class FFmpegCmd {
     }
 
     // 开子线程调用native方法进行音视频处理
-    public static void execute(final String[] commands, final int type, final OnHandleListener onHandleListener) {
+    public static void execute(final String[] commands, final OnHandleListener onHandleListener) {
         FFmpegCmd.onHandleListener = onHandleListener;
         new Thread(new Runnable() {
             @Override
@@ -28,7 +24,7 @@ public class FFmpegCmd {
                     onHandleListener.onBegin();
                 }
                 // 调用ffmpeg进行处理
-                int result = handle(commands, type);
+                int result = handle(commands, BUSINESS_TYPE_CUT);
                 if (onHandleListener != null) {
                     onHandleListener.onEnd(result);
                 }
@@ -38,61 +34,44 @@ public class FFmpegCmd {
 
     private native static int handle(String[] commands, int type);
 
-    public static void onProgress(String time, int type) {
-        Log.e("====onProgress", "" + time + "  type：" + type);
-        if (onHandleListener != null && time != null) {
-            onHandleListener.onProgress(parseInt(time.trim()), type);
-        }
-    }
+    public static void onCallback(String log, int type) {
+        if (log != null) {
+            if (type == BUSINESS_TYPE_CUT) { // 裁剪模块
+                Log.d("====onCallback", "" + log);
 
-    public static int parseInt(Object obj) {
-        int count = 0;
-        if (obj != null) {
-            if (obj instanceof Integer) {
-                count = ((Integer) obj).intValue();
-            } else if (obj instanceof Long) {
-                try {
-                    count = ((Long) obj).intValue();
-                } catch (Exception e) {
-                }
-            } else if (obj instanceof BigInteger) {
-                count = ((BigInteger) obj).intValue();
-            } else if (obj instanceof Float) {
-//                try {
-//                    count = ((Float) obj).intValue();
-//                } catch (Exception e) {
-//                }
-                count = (int) ((Float) obj + 0.5);
-            } else if (obj instanceof Double) {
-//                try {
-//                    count = ((Double) obj).intValue();
-//                } catch (Exception e) {
-//                }
-                count = (int) ((Double) obj + 0.5);
-            } else if (obj instanceof BigDecimal) {
-                count = ((BigDecimal) obj).intValue();
-            } else if (obj instanceof Byte) {
-                count = ((Byte) obj).intValue();
-            } else if (obj instanceof Boolean) {
-                count = ((Boolean) obj) ? 1 : 0;
-            } else if (obj instanceof String) {
-                if (TextUtils.isEmpty((String) obj)) {
-                    return count;
-                }
-                try {
-                    count = Integer.parseInt(((String) obj).trim());
-                } catch (Exception e) {
-                    return count;
+                int dtsIndex = log.indexOf("dts ");
+                if (dtsIndex > -1) {
+                    String dtsLog = log.substring(dtsIndex, log.length() - 1);
+                    String[] sepLogArr = dtsLog.split(",");
+                    if (sepLogArr.length > 0) {
+                        String timeLog;
+                        String[] dtsArr = sepLogArr[0].split("dts ");
+                        if (dtsArr.length > 1) {
+                            timeLog = dtsArr[1];
+                        } else {
+                            timeLog = dtsArr[0];
+                        }
+
+                        onProgress(timeLog);
+                    }
                 }
             }
         }
-        return count;
+    }
+
+    public static void onProgress(String dts) {
+        if (onHandleListener != null && dts != null) {
+            try {
+                onHandleListener.onProgress(Integer.parseInt(dts.trim()));
+            } catch (Exception e) {
+            }
+        }
     }
 
     public interface OnHandleListener {
         void onBegin();
 
-        void onProgress(int time, int type);
+        void onProgress(int dts);
 
         void onEnd(int result);
     }
