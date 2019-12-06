@@ -58,3 +58,4 @@ SLIB_INSTALL_LINKS='$(SLIBNAME)'
 
 12、Demo参考：https://www.jianshu.com/p/e8727f01cc6b ，https://github.com/xch168/VideoEditor
 
+13、x264包地址：http://download.videolan.org/x264/snapshots/  参考： https://www.jianshu.com/p/1bb2fdb85392

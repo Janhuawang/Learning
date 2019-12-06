@@ -4976,7 +4976,6 @@ int ffmpeg_main(int argc, char **argv) {
         av_log(NULL, AV_LOG_FATAL, "exit_program(main_return_code) \n");
     }
 
-    onDone();
     clear();
     ffmpeg_cleanup(0);
 

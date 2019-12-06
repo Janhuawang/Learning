@@ -252,7 +252,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 }
                 String output = OutDir + File.separator + "cutA.mp4";
                 int startTime = 1;
-                int duration = 60;
+                int duration = 59;
 //                String[] commandLine = FFmpegUtil.cutVideoCopyts(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(startTime+duration), output);
                 cutVideo(srcFile, startTime, duration, output);
                 break;

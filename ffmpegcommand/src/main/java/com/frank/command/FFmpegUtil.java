@@ -178,7 +178,7 @@ public class FFmpegUtil {
     public static String[] cutVideoX264Nmber(String srcFile, int startTime, int duration, String output) {
 //        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
 //        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
-        String cutVideoCmd = "ffmpeg -i %s -ss %d -t %d -c:v libx264 -c:a aac -strict experimental %s";
+        String cutVideoCmd = "ffmpeg -d -i %s -ss %d -t %d -c:v libx264 -c:a aac -strict experimental %s";
         cutVideoCmd = String.format(cutVideoCmd,srcFile, startTime,  duration, output);
 //        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
         return cutVideoCmd.split(" ");//以空格分割为字符串数组

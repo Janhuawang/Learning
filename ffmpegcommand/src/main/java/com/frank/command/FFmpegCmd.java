@@ -45,9 +45,6 @@ public class FFmpegCmd {
         }
     }
 
-    public static void onDone() {
-    }
-
     public static int parseInt(Object obj) {
         int count = 0;
         if (obj != null) {
