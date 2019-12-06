@@ -183,7 +183,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                     return;
                 }
                 String[] commandLine = FFmpegUtil.multiVideo(input1, input2, outputFile, VideoLayout.LAYOUT_HORIZONTAL);
-                executeFFmpegCmd(commandLine, null);
+                executeFFmpegCmd(commandLine, 0, null);
                 break;
             }
 
@@ -204,7 +204,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                 int mDuration = 20;//持续时间（注意开始时间+持续时间之和不能大于视频总时长）
                 int mFrameRate = 10;//帧率（从视频中每秒抽多少帧）
                 String[] commandLine = FFmpegUtil.videoToImage(srcFile, mStartTime, mDuration, mFrameRate, imagePath);
-                executeFFmpegCmd(commandLine, null);
+                executeFFmpegCmd(commandLine, 0, null);
                 break;
             }
 
@@ -234,7 +234,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
 //                vList.add(input2);
 //
 //                String[] commandLine = FFmpegUtil.concatVideo(vList, output);
-                executeFFmpegCmd(commandLine, null);
+                executeFFmpegCmd(commandLine, 0, null);
                 break;
             }
 
@@ -251,8 +251,8 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                     return;
                 }
                 String output = OutDir + File.separator + "cutA.mp4";
-                int startTime = 1;
-                int duration = 20;
+                int startTime = 30;
+                int duration = 90;
 //                String[] commandLine = FFmpegUtil.cutVideoCopyts(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(startTime+duration), output);
                 cutVideo(srcFile, startTime, duration, output);
                 break;
@@ -268,9 +268,10 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
      * @param output
      */
     private void cutVideo(String srcFile, final int startTime, final int duration, String output) {
-        String[] commandLine = FFmpegUtil.cutVideoS6(srcFile, startTime, duration, output);
+        String[] commandLine = FFmpegUtil.cutVideoX264Nmber(srcFile, startTime, duration, output);
+        int type = FFmpegCmd.BUSINESS_TYPE_CUT2;
 
-        FFmpegCmd.execute(commandLine, new FFmpegCmd.OnHandleListener() {
+        FFmpegCmd.execute(commandLine, type, new FFmpegCmd.OnHandleListener() {
             @Override
             public void onBegin() {
                 Log.i(TAG, "handle video onBegin...");
@@ -278,13 +279,27 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
             }
 
             @Override
-            public void onProgress(int dts) {
+            public void onProgress(int dts, int type) {
                 if (dts > 0) {
-                    float seconds = dts / 1000f / 1000;
-                    float progress = seconds - startTime;
-                    float max = duration - startTime;
-                    int percentage = (int) (progress * 100 / max);
-                    mHandler.obtainMessage(MSG_PROGRESS, percentage).sendToTarget();
+                    switch (type) {
+                        case FFmpegCmd.BUSINESS_TYPE_CUT: {
+                            float seconds = dts / 1000f / 1000;
+                            float progress = seconds - startTime;
+                            float max = duration - startTime;
+                            int percentage = (int) (progress * 100 / max);
+                            mHandler.obtainMessage(MSG_PROGRESS, percentage).sendToTarget();
+                            break;
+                        }
+
+                        case FFmpegCmd.BUSINESS_TYPE_CUT2: {
+                            float seconds = dts / 1000f / 1000;
+                            float progress = seconds;
+                            float max = startTime + duration;
+                            int percentage = (int) (progress * 100 / max);
+                            mHandler.obtainMessage(MSG_PROGRESS, percentage).sendToTarget();
+                            break;
+                        }
+                    }
                 }
 
             }
@@ -303,7 +318,7 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
      * @param commandLine
      * @param onHandleListener
      */
-    private void executeFFmpegCmd(final String[] commandLine, final FFmpegCmd.OnHandleListener onHandleListener) {
-        FFmpegCmd.execute(commandLine, onHandleListener);
+    private void executeFFmpegCmd(final String[] commandLine, final int type, final FFmpegCmd.OnHandleListener onHandleListener) {
+        FFmpegCmd.execute(commandLine, type, onHandleListener);
     }
 }

@@ -175,6 +175,14 @@ public class FFmpegUtil {
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 
+    /**
+     * 精确截取视频，避免关键帧的丢失并精确截取时间，重新编码整个视频
+     * @param srcFile
+     * @param startTime
+     * @param duration
+     * @param output
+     * @return
+     */
     public static String[] cutVideoX264Nmber(String srcFile, int startTime, int duration, String output) {
 //        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
 //        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
