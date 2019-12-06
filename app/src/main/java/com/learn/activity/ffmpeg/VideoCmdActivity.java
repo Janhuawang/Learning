@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.frank.command.FFmpegCmd;
+import com.frank.command.FFmpegCutUtil;
 import com.frank.command.FFmpegUtil;
 import com.learn.R;
 import com.learn.activity.ffmpeg.formate.VideoLayout;
@@ -245,14 +246,15 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
 //                String srcFile = PATH + File.separator + "a.mp4";
 //                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20190717_220948176.mp4";
 //                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20191107_213834608.mp4";
-                String srcFile = "/storage/emulated/0/aaaa/a.mp4";
+//                String srcFile = "/storage/emulated/0/aaaa/a.mp4";
+                String srcFile = "/storage/emulated/0/aaaa/aa3.qsv";
 
                 if (!FileUtil.checkFileExist(srcFile)) {
                     return;
                 }
                 String output = OutDir + File.separator + "cutA.mp4";
-                int startTime = 30;
-                int duration = 90;
+                int startTime = 2;
+                int duration = 45 * 60;
 //                String[] commandLine = FFmpegUtil.cutVideoCopyts(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(startTime+duration), output);
                 cutVideo(srcFile, startTime, duration, output);
                 break;
@@ -268,7 +270,13 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
      * @param output
      */
     private void cutVideo(String srcFile, final int startTime, final int duration, String output) {
-        String[] commandLine = FFmpegUtil.cutVideoX264Nmber(srcFile, startTime, duration, output);
+//        String[] commandLine = FFmpegCutUtil.cutVideoX264Number(srcFile, startTime, duration, output);
+//        int type = FFmpegCmd.BUSINESS_TYPE_CUT2;
+
+//        String[] commandLine = FFmpegCutUtil.cutVideoQScale(srcFile, startTime, duration, output);
+//        int type = FFmpegCmd.BUSINESS_TYPE_CUT;
+
+        String[] commandLine = FFmpegCutUtil.cutVideoX264Fast(srcFile, startTime, duration, output);
         int type = FFmpegCmd.BUSINESS_TYPE_CUT2;
 
         FFmpegCmd.execute(commandLine, type, new FFmpegCmd.OnHandleListener() {
@@ -284,8 +292,8 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
                     switch (type) {
                         case FFmpegCmd.BUSINESS_TYPE_CUT: {
                             float seconds = dts / 1000f / 1000;
-                            float progress = seconds - startTime;
-                            float max = duration - startTime;
+                            float progress = seconds;
+                            float max = duration + startTime;
                             int percentage = (int) (progress * 100 / max);
                             mHandler.obtainMessage(MSG_PROGRESS, percentage).sendToTarget();
                             break;

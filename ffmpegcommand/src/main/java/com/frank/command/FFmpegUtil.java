@@ -156,14 +156,12 @@ public class FFmpegUtil {
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 
-    public static String[] cutVideoX264(String srcFile, String startTime, String duration, String output) {
-//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
+    public static String[] cutVideoX264(String srcFile, int startTime, int duration, String output) {
+        String cutVideoCmd = "ffmpeg -d -ss %d -i %s -c:v libx264 -crf 18 -t %d -c:a copy %s";
+        cutVideoCmd = String.format(cutVideoCmd, startTime,srcFile,  duration, output);
 //        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
 //        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
-
-        String cutVideoCmd = "ffmpeg -d -i %s -ss %s -to %s -c:v libx264 -c:a aac -strict experimental %s";
-        cutVideoCmd = String.format(cutVideoCmd,srcFile, startTime,  duration, output);
-
+//        String cutVideoCmd = "ffmpeg -d -i %s -ss %s -to %s -c:v libx264 -c:a aac -strict experimental %s";
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
     }
 
@@ -173,36 +171,6 @@ public class FFmpegUtil {
         cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, output);
 
         return cutVideoCmd.split(" ");//以空格分割为字符串数组
-    }
-
-    /**
-     * 精确截取视频，避免关键帧的丢失并精确截取时间，重新编码整个视频
-     * @param srcFile
-     * @param startTime
-     * @param duration
-     * @param output
-     * @return
-     */
-    public static String[] cutVideoX264Nmber(String srcFile, int startTime, int duration, String output) {
-//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -crf 18 -to %s -c:a copy %s";
-//        String cutVideoCmd = "ffmpeg -d -ss %s -i %s -c:v libx264 -preset ultrafast -crf 0 -to %s %s";
-        String cutVideoCmd = "ffmpeg -d -i %s -ss %d -t %d -c:v libx264 -c:a aac -strict experimental %s";
-        cutVideoCmd = String.format(cutVideoCmd,srcFile, startTime,  duration, output);
-//        cutVideoCmd = String.format(cutVideoCmd, startTime, srcFile, duration, output);
-        return cutVideoCmd.split(" ");//以空格分割为字符串数组
-    }
-
-    /*
-     * 非常准确
-     * 非常耗时
-     * 画面清晰
-     * 让每一帧都成为关键帧，即由原来的帧间编码转换为帧内编码再进行裁剪，这样可以裁剪任意时间点，不受关键帧影响
-     * */
-    @SuppressLint("DefaultLocale")
-    public static String[] cutVideoS6(String srcFile, int startTime, int duration, String output) {
-        String cutVideoCmd = "ffmpeg -d -i %s -ss %d -t %d -strict -2 -qscale 0 -intra %s";
-        cutVideoCmd = String.format(cutVideoCmd, srcFile, startTime, duration, output);
-        return cutVideoCmd.split(" ");//以空格分割为字符串数组;
     }
 
     /**
