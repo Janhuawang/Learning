@@ -12,7 +12,7 @@ static jint m_businessType;
 static jmethodID methodID;
 
 JNIEXPORT jint JNICALL
-Java_com_frank_command_FFmpegCmd_handle(JNIEnv *env, jclass obj, jobjectArray commands,
+Java_com_frank_command_FFMPegMain_handle(JNIEnv *env, jclass obj, jobjectArray commands,
                                         jint businessType) {
 
     (*env)->GetJavaVM(env, &jvm);

@@ -6,16 +6,18 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.TextView;
 
+import com.frank.callback.AudioEditImpl;
 import com.learn.R;
 import com.learn.base.BaseActivity;
 import com.learn.util.TimeUtil;
 import com.medialib.audioedit.bean.AudioMsg;
-import com.medialib.audioedit.service.AudioTaskCreator;
 import com.medialib.audioedit.util.FileUtils;
 import com.medialib.audioedit.util.ToastUtil;
 
@@ -30,12 +32,60 @@ import java.io.File;
  */
 public class AudioEditActivity extends BaseActivity {
     private static final int REQUEST_AUDIO_CODE = 1;
+    private final int MSG_BEGIN = 11;
+    private final int MSG_PROGRESS = 12;
+    private final int MSG_FINISH = 13;
 
     private TextView tv_path_1, tv_path_2, tv_path_3, tv_log;
-
     private int mCurPickBtnId;
+
     private String mCurPath = "/storage/emulated/0/AudioEdit/audio/out.wav";
-    private StringBuilder stringBuilder = new StringBuilder();
+    private StringBuilder logBuilder = new StringBuilder();
+
+    /**
+     * UI线程处理
+     */
+    private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case MSG_BEGIN:
+                    showProgress(true);
+                    updateLog(true);
+                    break;
+
+                case MSG_PROGRESS:
+                    break;
+
+                case MSG_FINISH:
+                    showProgress(false);
+                    updateLog(false);
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+    /**
+     * 回调
+     */
+    private AudioEditImpl audioEdit = new AudioEditImpl() {
+        @Override
+        public void onProgress(int dts, int type) {
+
+        }
+
+        @Override
+        public void onBegin() {
+            mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
+        }
+
+        @Override
+        public void onEnd(int result) {
+            mHandler.obtainMessage(MSG_FINISH).sendToTarget();
+        }
+    };
 
     public static Uri fromFile(Context context, File file) {
         if (context == null || file == null) {
@@ -79,7 +129,11 @@ public class AudioEditActivity extends BaseActivity {
         findViewById(R.id.btn_mix).setOnClickListener(this);
         findViewById(R.id.btn_cut).setOnClickListener(this);
         findViewById(R.id.btn_insert).setOnClickListener(this);
-        findViewById(R.id.tv_start).setOnClickListener(this);
+        findViewById(R.id.tv_play).setOnClickListener(this);
+        findViewById(R.id.btn_fade_in).setOnClickListener(this);
+        findViewById(R.id.btn_fade_out).setOnClickListener(this);
+        findViewById(R.id.btn_cycle).setOnClickListener(this);
+
         tv_path_1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,19 +156,29 @@ public class AudioEditActivity extends BaseActivity {
     public void onClick(View v) {
         super.onClick(v);
         switch (v.getId()) {
-            case R.id.btn_mix:
+            case R.id.btn_mix: // 混合
                 mixAudio();
                 break;
 
-            case R.id.btn_cut:
+            case R.id.btn_cut: // 裁剪
                 cutAudio();
                 break;
 
-            case R.id.btn_insert:
+            case R.id.btn_insert: // 插入拼接
                 insertAudio();
                 break;
 
-            case R.id.tv_start:
+            case R.id.btn_fade_in: // 淡入
+                fadeIn();
+                break;
+
+            case R.id.btn_fade_out:// 淡出
+                break;
+
+            case R.id.btn_cycle:// 循环
+                break;
+
+            case R.id.tv_play: // 播放
                 playAudio(mCurPath);
                 break;
         }
@@ -136,14 +200,29 @@ public class AudioEditActivity extends BaseActivity {
                     case R.id.tv_path_1:
                         tv_path_1.setText(path);
                         break;
+
                     case R.id.tv_path_2:
                         tv_path_2.setText(path);
                         break;
+
                     default:
                         break;
                 }
             }
         }
+    }
+
+    /**
+     * 淡入
+     */
+    private void fadeIn() {
+        String path1 = tv_path_1.getText().toString();
+        if (TextUtils.isEmpty(path1)) {
+            ToastUtil.showToast("音频路径为空");
+            return;
+        }
+
+        AudioEditUtil.audioFadeInTest(path1, audioEdit);
     }
 
     /**
@@ -158,10 +237,9 @@ public class AudioEditActivity extends BaseActivity {
             return;
         }
 
-        showProgress(true);
-        updateLog(true);
+        mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
 
-        AudioTaskCreator.createMixAudioTask(AudioEditActivity.this, path1, path2, 1f, 0.2f);
+        AudioEditUtil.onMixAudio(AudioEditActivity.this, path1, path2, 1f, 0.2f);
     }
 
     /**
@@ -184,10 +262,9 @@ public class AudioEditActivity extends BaseActivity {
             return;
         }
 
-        showProgress(true);
-        updateLog(true);
+        mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
 
-        AudioTaskCreator.createInsertAudioTask(AudioEditActivity.this, path1, path2, insertPointTime);
+        AudioEditUtil.onInsertAudio(AudioEditActivity.this, path1, path2, insertPointTime);
     }
 
     /**
@@ -200,7 +277,7 @@ public class AudioEditActivity extends BaseActivity {
             ToastUtil.showToast("音频路径为空");
             return;
         }
-        float startTime = 1;
+        float startTime = 20;
         float endTime = 1 * 60;
 
         if (startTime <= 0) {
@@ -216,10 +293,7 @@ public class AudioEditActivity extends BaseActivity {
             return;
         }
 
-        showProgress(true);
-        updateLog(true);
-
-        AudioTaskCreator.createCutAudioTask(AudioEditActivity.this, path1, startTime, endTime);
+        AudioEditUtil.onCutAudio(AudioEditActivity.this, path1, startTime, endTime, audioEdit);
     }
 
     /**
@@ -269,12 +343,12 @@ public class AudioEditActivity extends BaseActivity {
      * @param isStart
      */
     private void updateLog(boolean isStart) {
-        if (tv_log != null && stringBuilder != null) {
-            stringBuilder.append((isStart ? "开始时间: " : "结束时间: ") + TimeUtil.getNowTimeStr("yyyy-MM-dd HH:mm:ss")).append("\n");
+        if (tv_log != null && logBuilder != null) {
+            logBuilder.append((isStart ? "开始时间: " : "结束时间: ") + TimeUtil.getNowTimeStr("yyyy-MM-dd HH:mm:ss")).append("\n");
             if (!isStart) {
-                stringBuilder.append("\n\n");
+                logBuilder.append("\n\n");
             }
-            tv_log.setText(stringBuilder.toString());
+            tv_log.setText(logBuilder.toString());
         }
     }
 
@@ -285,8 +359,7 @@ public class AudioEditActivity extends BaseActivity {
             mCurPath = msg.path;
 
             if (msg.isDone()) {
-                showProgress(false);
-                updateLog(false);
+                mHandler.obtainMessage(MSG_FINISH).sendToTarget();
             }
         }
     }
