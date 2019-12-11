@@ -53,11 +53,12 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation DESIGN
+    implementation project(path: ':base')
     implementation 'com.github.bumptech.glide:glide:4.8.0'
 //    implementation project(path: ':ffmpeg')
 //    implementation project(path: ':ffmpeglib')
     implementation project(path: ':ffmpegcommand')
+    implementation project(path: ':medialib')
 }
 
 

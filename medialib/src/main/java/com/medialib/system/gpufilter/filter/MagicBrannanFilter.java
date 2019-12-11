@@ -2,8 +2,9 @@ package com.medialib.system.gpufilter.filter;
 
 import android.opengl.GLES20;
 
-import com.library.base.XApplication;
-import com.umu.componentffmpeg.R;
+
+import com.medialib.R;
+import com.medialib.system.App;
 import com.medialib.system.gpufilter.basefilter.GPUImageFilter;
 import com.medialib.system.gpufilter.utils.OpenGlUtils;
 
@@ -55,11 +56,11 @@ public class MagicBrannanFilter extends GPUImageFilter {
         setFloat(mGLStrengthLocation, 1.0f);
         runOnDraw(new Runnable() {
             public void run() {
-                inputTextureHandles[0] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/brannan_process.png");
-                inputTextureHandles[1] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/brannan_blowout.png");
-                inputTextureHandles[2] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/brannan_contrast.png");
-                inputTextureHandles[3] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/brannan_luma.png");
-                inputTextureHandles[4] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/brannan_screen.png");
+                inputTextureHandles[0] = OpenGlUtils.loadTexture(App.getApplication(), "filter/brannan_process.png");
+                inputTextureHandles[1] = OpenGlUtils.loadTexture(App.getApplication(), "filter/brannan_blowout.png");
+                inputTextureHandles[2] = OpenGlUtils.loadTexture(App.getApplication(), "filter/brannan_contrast.png");
+                inputTextureHandles[3] = OpenGlUtils.loadTexture(App.getApplication(), "filter/brannan_luma.png");
+                inputTextureHandles[4] = OpenGlUtils.loadTexture(App.getApplication(), "filter/brannan_screen.png");
             }
         });
     }

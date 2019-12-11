@@ -2,7 +2,8 @@ package com.medialib.system.utils;
 
 import android.content.res.Resources;
 
-import com.library.base.XApplication;
+
+import com.medialib.system.App;
 
 import java.io.InputStream;
 
@@ -14,7 +15,7 @@ import java.io.InputStream;
 public class OpenGlUtils {
     //通过资源路径加载shader脚本文件
     public static String uRes(String path) {
-        Resources resources = XApplication.getXApplication().getResources();
+        Resources resources = App.getApplication().getResources();
         StringBuilder result = new StringBuilder();
         try {
             InputStream is = resources.getAssets().open(path);

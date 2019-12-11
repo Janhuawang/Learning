@@ -1,8 +1,8 @@
 package com.medialib.system;
 
 import android.os.Build;
+import android.support.annotation.RequiresApi;
 
-import androidx.annotation.RequiresApi;
 
 import com.medialib.impl.NativeClipVideoCallback;
 import com.medialib.system.mediacodec.VideoClipper;

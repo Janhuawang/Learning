@@ -72,5 +72,10 @@
     <external-path
         name="file_load_test"
         path="tbs/" />
+
+    <!--/storage/emulated/0/AudioEdit/audio/out.wav-->
+    <external-path
+        name="audio_edit"
+        path="AudioEdit/audio/" />
 </paths>
 

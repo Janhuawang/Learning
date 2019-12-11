@@ -18,6 +18,7 @@ import com.learn.activity.ffmpeg.VideoCmdActivity;
 import com.learn.activity.ffmpeg.VideoFrameActivity;
 import com.learn.activity.glidedemo.sample.ZoomActivity;
 import com.learn.activity.loadfile.FileListActivity;
+import com.learn.activity.media.audio.AudioEditActivity;
 import com.learn.activity.thread.AsyncTaskActivity;
 import com.learn.activity.thread.LockActivity;
 import com.learn.activity.thread.SynchronizedActivity;
@@ -76,6 +77,7 @@ public class MainActivity extends AppCompatActivity {
         lists.add(new ItemBean("ffmpeg播放器", FFPlayerActivity.class.getName()));
         lists.add(new ItemBean("遍历本地文件", FileListActivity.class.getName()));
         lists.add(new ItemBean("获取视频帧", VideoFrameActivity.class.getName()));
+        lists.add(new ItemBean("音频编辑页", AudioEditActivity.class.getName()));
 
         initView();
     }

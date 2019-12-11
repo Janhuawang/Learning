@@ -1,2 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.medialib" />
+    package="com.medialib">
+
+    <application>
+        <service android:name="com.medialib.audioedit.service.AudioTaskService" />
+    </application>
+
+</manifest>

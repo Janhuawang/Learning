@@ -247,14 +247,14 @@ public class VideoCmdActivity extends AppCompatActivity implements View.OnClickL
 //                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20190717_220948176.mp4";
 //                String srcFile = "/storage/emulated/0/DCIM/Camera/VID_20191107_213834608.mp4";
 //                String srcFile = "/storage/emulated/0/aaaa/a.mp4";
-                String srcFile = "/storage/emulated/0/aaaa/aa3.qsv";
+                String srcFile = "/storage/emulated/0/aaaa/bb4.mp4";
 
                 if (!FileUtil.checkFileExist(srcFile)) {
                     return;
                 }
                 String output = OutDir + File.separator + "cutA.mp4";
                 int startTime = 2;
-                int duration = 45 * 60;
+                int duration = 9 * 60;
 //                String[] commandLine = FFmpegUtil.cutVideoCopyts(srcFile, TimeUtil.secToTime(startTime), TimeUtil.secToTime(startTime+duration), output);
                 cutVideo(srcFile, startTime, duration, output);
                 break;

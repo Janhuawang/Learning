@@ -5,7 +5,7 @@ import android.opengl.GLES20;
 
 
 import com.medialib.system.gpufilter.utils.OpenGlUtils;
-import com.umu.componentffmpeg.R;
+import com.medialib.R;
 
 import java.nio.FloatBuffer;
 

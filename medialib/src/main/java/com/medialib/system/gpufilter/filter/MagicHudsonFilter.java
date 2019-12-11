@@ -2,8 +2,8 @@ package com.medialib.system.gpufilter.filter;
 
 import android.opengl.GLES20;
 
-import com.library.base.XApplication;
-import com.umu.componentffmpeg.R;
+import com.medialib.R;
+import com.medialib.system.App;
 import com.medialib.system.gpufilter.basefilter.GPUImageFilter;
 import com.medialib.system.gpufilter.utils.OpenGlUtils;
 
@@ -56,9 +56,9 @@ public class MagicHudsonFilter extends GPUImageFilter {
 		setFloat(mGLStrengthLocation, 1.0f);
 	    runOnDraw(new Runnable(){
 		    public void run(){
-		    	inputTextureHandles[0] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/hudsonbackground.png");
-				inputTextureHandles[1] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/overlaymap.png");
-				inputTextureHandles[2] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/hudsonmap.png");
+		    	inputTextureHandles[0] = OpenGlUtils.loadTexture(App.getApplication(), "filter/hudsonbackground.png");
+				inputTextureHandles[1] = OpenGlUtils.loadTexture(App.getApplication(), "filter/overlaymap.png");
+				inputTextureHandles[2] = OpenGlUtils.loadTexture(App.getApplication(), "filter/hudsonmap.png");
 		    }
 	    });
 	}

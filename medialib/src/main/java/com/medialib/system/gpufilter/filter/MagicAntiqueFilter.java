@@ -2,7 +2,8 @@ package com.medialib.system.gpufilter.filter;
 
 import android.opengl.GLES20;
 
-import com.umu.componentffmpeg.R;
+
+import com.medialib.R;
 import com.medialib.system.gpufilter.basefilter.GPUImageFilter;
 import com.medialib.system.gpufilter.utils.OpenGlUtils;
 

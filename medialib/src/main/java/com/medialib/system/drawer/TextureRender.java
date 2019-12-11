@@ -24,8 +24,9 @@ import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.util.Log;
 
-import com.library.base.XApplication;
-import com.umu.componentffmpeg.R;
+
+import com.medialib.R;
+import com.medialib.system.App;
 import com.medialib.system.filter.AFilter;
 import com.medialib.system.filter.GroupFilter;
 import com.medialib.system.filter.NoFilter;
@@ -131,7 +132,7 @@ public class TextureRender {
                 .order(ByteOrder.nativeOrder()).asFloatBuffer();
         mTriangleVertices.put(mTriangleVerticesData).position(0);
         Matrix.setIdentityM(mSTMatrix, 0);
-        Resources resources = XApplication.getXApplication().getResources();
+        Resources resources = App.getApplication().getResources();
         mShow = new NoFilter(resources);
         mShow.setMatrix(MatrixUtils.flip(MatrixUtils.getOriginalMatrix(), false, true));
         rotationFilter = new RotationOESFilter(resources);

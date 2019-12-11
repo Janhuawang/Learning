@@ -26,6 +26,7 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation DESIGN
+    implementation project(path: ':base')
     implementation 'com.googlecode.mp4parser:isoparser:1.1.21'
+
 }

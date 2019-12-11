@@ -2,8 +2,9 @@ package com.medialib.system.gpufilter.filter;
 
 import android.opengl.GLES20;
 
-import com.library.base.XApplication;
-import com.umu.componentffmpeg.R;
+
+import com.medialib.R;
+import com.medialib.system.App;
 import com.medialib.system.gpufilter.basefilter.GPUImageFilter;
 import com.medialib.system.gpufilter.utils.OpenGlUtils;
 
@@ -55,7 +56,7 @@ public class MagicNashvilleFilter extends GPUImageFilter {
 		setFloat(mGLStrengthLocation, 1.0f);
 	    runOnDraw(new Runnable(){
 		    public void run(){
-		    	inputTextureHandles[0] = OpenGlUtils.loadTexture(XApplication.getXApplication(), "filter/nashvillemap.png");
+		    	inputTextureHandles[0] = OpenGlUtils.loadTexture(App.getApplication(), "filter/nashvillemap.png");
 		    }
 	    });
 	}
