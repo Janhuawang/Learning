@@ -11,6 +11,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import com.learn.R;
+import com.learn.activity.concurrent.SyncQueueActivity;
 import com.learn.activity.dialog.rotating.DialogRotatingActivity;
 import com.learn.activity.ffmpeg.FFPlayerActivity;
 import com.learn.activity.ffmpeg.VideoClipActivity;
@@ -78,6 +79,7 @@ public class MainActivity extends AppCompatActivity {
         lists.add(new ItemBean("遍历本地文件", FileListActivity.class.getName()));
         lists.add(new ItemBean("获取视频帧", VideoFrameActivity.class.getName()));
         lists.add(new ItemBean("音频编辑页", AudioEditActivity.class.getName()));
+        lists.add(new ItemBean("线程队列", SyncQueueActivity.class.getName()));
 
         initView();
     }
