@@ -205,7 +205,7 @@ public class AudioEditUtil {
       coverFis = new RandomAccessFile(coverWavePath, "rw");
       newFos = new RandomAccessFile(tempOutPcmPath, "rw");
 
-      final int srcStartPos = getPositionFromWave(startTime, sampleRate, channels, bitNum);
+      final int srcStartPos = getPositionFromWave(startTime, sampleRate, channels, bitNum); // 切入点
       final int coverStartPos = 0;
       final int coverEndPos = (int) coverFis.length() - WAVE_HEAD_SIZE;
 
@@ -423,8 +423,8 @@ public class AudioEditUtil {
       int value = ByteUtil.byte2Short(buffer[i + 1], buffer[i]);
       int tempValue = value;
       value *= volumeValue;
-      value = value > 0x7fff ? 0x7fff : value;
-      value = value < -0x8000 ? -0x8000 : value;
+      value = value > 0x7fff ? 0x7fff : value; // 32767
+      value = value < -0x8000 ? -0x8000 : value; // 32768
 
       short newValue = (short) value;
 

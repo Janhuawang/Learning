@@ -15,6 +15,8 @@ import android.widget.TextView;
 
 import com.frank.callback.AudioEditImpl;
 import com.learn.R;
+import com.learn.activity.media.audio.player.AudioPlayerMixer;
+import com.learn.activity.media.audio.player.IAudioPlayer;
 import com.learn.base.BaseActivity;
 import com.learn.util.TimeUtil;
 import com.medialib.audioedit.bean.AudioMsg;
@@ -28,6 +30,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.io.File;
 
 /**
+ * 音频编辑页
  * 作者：wjh on 2019-12-10 16:43
  */
 public class AudioEditActivity extends BaseActivity {
@@ -41,6 +44,11 @@ public class AudioEditActivity extends BaseActivity {
 
     private String mCurPath = "/storage/emulated/0/AudioEdit/audio/out.wav";
     private StringBuilder logBuilder = new StringBuilder();
+
+    /**
+     * 音频播放器
+     */
+    private IAudioPlayer mAudioPlayer;
 
     /**
      * UI线程处理
@@ -150,6 +158,8 @@ public class AudioEditActivity extends BaseActivity {
 
     @Override
     protected void initData() {
+        tv_path_1.setText("/storage/emulated/0/aavv/戴青塔娜-寂静的天空.wav");
+        tv_path_2.setText("/storage/emulated/0/aavv/卡奇社-别来无恙.wav");
     }
 
     @Override
@@ -179,13 +189,16 @@ public class AudioEditActivity extends BaseActivity {
                 break;
 
             case R.id.tv_play: // 播放
-                playAudio(mCurPath);
+                playAudio();
                 break;
         }
     }
 
     @Override
     protected void onDestroy() {
+        if (mAudioPlayer != null) {
+            mAudioPlayer.release();
+        }
         EventBus.getDefault().unregister(this);
         super.onDestroy();
     }
@@ -319,22 +332,23 @@ public class AudioEditActivity extends BaseActivity {
 
     /**
      * 播放声音
-     *
-     * @param path
      */
-    private void playAudio(String path) {
-        if (TextUtils.isEmpty(path)) {
-            ToastUtil.showToast("播放路径为空");
+    private void playAudio() {
+        String path1 = tv_path_1.getText().toString();
+        String path2 = tv_path_2.getText().toString();
+
+        if (TextUtils.isEmpty(path1) || TextUtils.isEmpty(path2)) {
+            ToastUtil.showToast("音频路径为空");
             return;
         }
 
-        try {
-            Intent it = new Intent(Intent.ACTION_VIEW);
-            it.setDataAndType(fromFile(AudioEditActivity.this, new File(path)), "audio/*");
-            startActivity(it);
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        if (mAudioPlayer == null) {
+            mAudioPlayer = new AudioPlayerMixer();
         }
+        mAudioPlayer.setWave(true);
+        mAudioPlayer.setMixPath(path1, path2);
+        mAudioPlayer.prepare();
+        mAudioPlayer.play();
     }
 
     /**

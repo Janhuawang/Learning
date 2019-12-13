@@ -14,7 +14,6 @@ import com.base.XApplication;
 import com.medialib.audioedit.callback.DecodeOperateInterface;
 import com.medialib.audioedit.common.Constant;
 import com.medialib.audioedit.ssrc.SSRC;
-import com.medialib.system.App;
 
 import java.io.BufferedOutputStream;
 import java.io.File;
