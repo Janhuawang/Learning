@@ -10,6 +10,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -344,6 +345,12 @@ public class AudioEditActivity extends BaseActivity {
 
         if (mAudioPlayer == null) {
             mAudioPlayer = new AudioPlayerMixer();
+            mAudioPlayer.addPlayerCallback(new IAudioPlayer.AudioPlayerCallback() {
+                @Override
+                public void playProgress(int totalTime, int playTime) {
+                    Log.d("onPeriodicNotification", "totalTime:" + totalTime + "  playTime：" + playTime);
+                }
+            });
         }
         mAudioPlayer.setWave(true);
         mAudioPlayer.setMixPath(path1, path2);

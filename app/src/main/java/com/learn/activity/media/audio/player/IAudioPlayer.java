@@ -40,6 +40,11 @@ public abstract class IAudioPlayer {
 
     public abstract void seek(int seekTime); // 单位秒
 
+    public abstract void addPlayerCallback(AudioPlayerCallback audioPlayerCallback);
+
+    public interface AudioPlayerCallback {
+        void playProgress(int totalTime, int playTime);// 播放时间回调
+    }
 }
 
 

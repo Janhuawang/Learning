@@ -3,9 +3,7 @@ package com.learn.activity.media.audio.player;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
-import android.util.Log;
 
-import com.learn.util.TimeUtil;
 import com.medialib.audioedit.bean.Audio;
 import com.medialib.audioedit.util.FileUtils;
 import com.medialib.audioedit.util.MultiAudioMixer;
@@ -34,6 +32,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
     private int sampleRate;
     private int channel;
     private int bitNum;
+    private int sampleSize;
+    private int timeMillis;
 
     /**
      * 音频轨道
@@ -68,6 +68,10 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 当前读取大小
      */
     private int currentReadLength;
+    /**
+     * 音频播放时间回调
+     */
+    private AudioPlayerCallback audioPlayerCallback;
 
     @Override
     public void setMixPath(String srcFilePath, String coverFilePath) {
@@ -197,6 +201,11 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
     }
 
+    @Override
+    public void addPlayerCallback(AudioPlayerCallback audioPlayerCallback) {
+        this.audioPlayerCallback = audioPlayerCallback;
+    }
+
     /**
      * 播放结束
      */
@@ -264,8 +273,9 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
             @Override
             public void onPeriodicNotification(AudioTrack track) {
-                int timeS = AudioMixUtil.getTimeFormFilePosition(currentReadLength,sampleRate,channel,bitNum);
-                Log.e("onPeriodicNotification", "" + TimeUtil.getNowTimeStr("yyyy-MM-dd HH:mm:ss") + "  当前秒："+timeS);
+                if (audioPlayerCallback != null && currentReadLength > 0) {
+                    audioPlayerCallback.playProgress(timeMillis, (int) (currentReadLength * 1f / sampleSize));
+                }
             }
         });
     }
@@ -280,6 +290,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
             sampleRate = audioParam.getSampleRate();
             channel = audioParam.getChannel();
             bitNum = audioParam.getBitNum();
+            sampleSize = sampleRate * channel * bitNum / 8;
+            timeMillis = (int) (audioParam.getTimeMillis() / 1000f);
         }
     }
 

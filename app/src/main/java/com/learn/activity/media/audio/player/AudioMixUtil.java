@@ -55,17 +55,4 @@ public class AudioMixUtil {
         return position;
     }
 
-    /**
-     * 获取时长
-     *
-     * @param currentReadLength
-     * @param sampleRate
-     * @param channels
-     * @param bitNum
-     * @return 秒
-     */
-    public static int getTimeFormFilePosition(int currentReadLength, int sampleRate, int channels, int bitNum) {
-        int byteNum = bitNum / 8;
-        return (int) (currentReadLength * 1f / (sampleRate * channels * byteNum));
-    }
 }
