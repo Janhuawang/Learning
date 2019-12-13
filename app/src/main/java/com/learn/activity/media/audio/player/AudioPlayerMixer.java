@@ -3,7 +3,9 @@ package com.learn.activity.media.audio.player;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
+import com.learn.util.TimeUtil;
 import com.medialib.audioedit.bean.Audio;
 import com.medialib.audioedit.util.FileUtils;
 import com.medialib.audioedit.util.MultiAudioMixer;
@@ -55,13 +57,17 @@ public class AudioPlayerMixer extends IAudioPlayer {
      */
     private boolean isWave;
     /**
-     * 音量比例
+     * 音量比例 默认是1
      */
-    private float srcVolume, coverVolume;
+    private float srcVolume = 1f, coverVolume = 1f;
     /**
      * 线程退出态
      */
     private boolean mThreadExitFlag;
+    /**
+     * 当前读取大小
+     */
+    private int currentReadLength;
 
     @Override
     public void setMixPath(String srcFilePath, String coverFilePath) {
@@ -122,6 +128,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
 
         mThreadExitFlag = true;
+
+        stop();
 
         releaseAudioTrack();
 
@@ -193,8 +201,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 播放结束
      */
     private void playFinish() {
-        mPlayAudioThread = null;
-
         closeFile();
 
         if (mPlayState != PlayState.MPS_PAUSE) {
@@ -237,12 +243,10 @@ public class AudioPlayerMixer extends IAudioPlayer {
                 channelConfig = AudioFormat.CHANNEL_IN_STEREO;
         }
 
-        // 获得构建对象的最小缓冲区大小
+        // 获得构建对象的最小缓冲区大小 - 按照数字音频的知识，这个算出来的是一秒钟buffer的大小。
         int minBufSize = AudioTrack.getMinBufferSize(sampleRate,
                 channelConfig,
                 audioFormat);
-
-        int mPrimePlaySize = minBufSize * 2;
 
         // 初始化
         mAudioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
@@ -251,6 +255,19 @@ public class AudioPlayerMixer extends IAudioPlayer {
                 audioFormat,
                 minBufSize,
                 AudioTrack.MODE_STREAM);
+
+        mAudioTrack.setPositionNotificationPeriod(minBufSize);
+        mAudioTrack.setPlaybackPositionUpdateListener(new AudioTrack.OnPlaybackPositionUpdateListener() {
+            @Override
+            public void onMarkerReached(AudioTrack track) {
+            }
+
+            @Override
+            public void onPeriodicNotification(AudioTrack track) {
+                int timeS = AudioMixUtil.getTimeFormFilePosition(currentReadLength,sampleRate,channel,bitNum);
+                Log.e("onPeriodicNotification", "" + TimeUtil.getNowTimeStr("yyyy-MM-dd HH:mm:ss") + "  当前秒："+timeS);
+            }
+        });
     }
 
     /**
@@ -292,6 +309,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
     private void stopThread() {
         if (mPlayAudioThread != null) {
             mThreadExitFlag = true;
+            mPlayAudioThread.interrupt();
             mPlayAudioThread = null;
         }
     }
@@ -328,7 +346,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     interface PlayAudioCallback {
-        void writeMixData(byte[] mixData);
+        void writeMixData(byte[] mixData, int totalReadLength);
 
         void writeDone();
     }
@@ -346,23 +364,25 @@ public class AudioPlayerMixer extends IAudioPlayer {
                 try {
                     mixData(srcFis, coverFis, srcVolume, coverVolume, new PlayAudioCallback() {
                         @Override
-                        public void writeMixData(byte[] mixData) {
+                        public void writeMixData(byte[] mixData, int totalReadLength) {
+                            AudioPlayerMixer.this.currentReadLength = totalReadLength;
+
                             mAudioTrack.write(mixData, 0, mixData.length);
                         }
 
                         @Override
                         public void writeDone() {
+                            mAudioTrack.stop();
                             AudioPlayerMixer.this.playFinish();
                         }
                     });
                 } catch (Exception e) {
                     e.printStackTrace();
+                    mAudioTrack.stop();
                     AudioPlayerMixer.this.playFinish();
                     break;
                 }
             }
-
-            mAudioTrack.stop();
         }
 
         /**
@@ -375,15 +395,21 @@ public class AudioPlayerMixer extends IAudioPlayer {
             byte[] srcBuffer = new byte[2048];
             byte[] coverBuffer = new byte[2048];
 
+            int totalReadLength = 0;
+            int length;
+
             try {
-                while (coverFis.read(coverBuffer) != -1) {
-                    srcFis.read(srcBuffer);
+                while ((length = srcFis.read(srcBuffer)) != -1) {
+                    coverFis.read(coverBuffer);
+
+                    totalReadLength += length;
+
                     srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, volumeAudio1);
                     coverBuffer = AudioMixUtil.changeDataWithVolume(coverBuffer, volumeAudio2);
 
                     byte[] mixData = mix.mixRawAudioBytes(new byte[][]{srcBuffer, coverBuffer});
                     if (playAudioCallback != null) {
-                        playAudioCallback.writeMixData(mixData);
+                        playAudioCallback.writeMixData(mixData, totalReadLength);
                     }
                 }
 
