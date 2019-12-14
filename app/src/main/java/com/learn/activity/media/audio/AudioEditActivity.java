@@ -292,7 +292,7 @@ public class AudioEditActivity extends BaseActivity {
             return;
         }
         float startTime = 20;
-        float endTime = 1 * 60;
+        float endTime = 40;
 
         if (startTime <= 0) {
             ToastUtil.showToast("时间不对");
@@ -354,6 +354,7 @@ public class AudioEditActivity extends BaseActivity {
         }
         mAudioPlayer.setWave(true);
         mAudioPlayer.setMixPath(path1, path2);
+        mAudioPlayer.setLoopToCover(true);
         mAudioPlayer.prepare();
         mAudioPlayer.play();
     }

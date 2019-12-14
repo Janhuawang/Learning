@@ -28,6 +28,13 @@ public abstract class IAudioPlayer {
 
     public abstract void setWave(boolean isWave);
 
+    /**
+     * 设置背景乐循环状态
+     *
+     * @param isLoop
+     */
+    public abstract void setLoopToCover(boolean isLoop);
+
     public abstract boolean prepare();
 
     public abstract boolean release();

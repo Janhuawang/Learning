@@ -3,6 +3,7 @@ package com.learn.activity.media.audio.player;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.util.Log;
 
 import com.medialib.audioedit.bean.Audio;
 import com.medialib.audioedit.util.FileUtils;
@@ -72,6 +73,10 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 音频播放时间回调
      */
     private AudioPlayerCallback audioPlayerCallback;
+    /**
+     * 背景乐是否设置循环模式
+     */
+    private boolean isLoopToCover;
 
     @Override
     public void setMixPath(String srcFilePath, String coverFilePath) {
@@ -106,6 +111,11 @@ public class AudioPlayerMixer extends IAudioPlayer {
     @Override
     public void setWave(boolean isWave) {
         this.isWave = isWave;
+    }
+
+    @Override
+    public void setLoopToCover(boolean isLoop) {
+        this.isLoopToCover = isLoop;
     }
 
     @Override
@@ -188,17 +198,9 @@ public class AudioPlayerMixer extends IAudioPlayer {
         if (mBReady == false) {
             return;
         }
-        if (srcFis == null || coverFis == null || seekTime < 0) {
-            return;
-        }
 
-        final int seekPos = AudioMixUtil.getPositionFromWave(seekTime, sampleRate, channel, bitNum);
-        try {
-            srcFis.seek(this.isWave ? WAVE_HEAD_SIZE + seekPos : seekPos);
-            coverFis.seek(this.isWave ? WAVE_HEAD_SIZE + seekPos : seekPos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        seekFile(seekTime, srcFis);
+        seekFile(seekTime, coverFis);
     }
 
     @Override
@@ -357,6 +359,40 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
     }
 
+    /**
+     * 指定文件读流位置
+     *
+     * @param seekTime
+     * @param file
+     */
+    private void seekFile(int seekTime, RandomAccessFile file) {
+        if (file != null && seekTime >= 0) {
+            final int seekPos = AudioMixUtil.getPositionFromWave(seekTime, sampleRate, channel, bitNum);
+            try {
+                file.seek(this.isWave ? WAVE_HEAD_SIZE + seekPos : seekPos);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    /**
+     * 获取文件数据大小
+     *
+     * @param file
+     * @return
+     */
+    private int getFileDataSize(RandomAccessFile file) {
+        if (file != null) {
+            try {
+                return (int) (this.isWave ? file.length() - WAVE_HEAD_SIZE : file.length());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return 0;
+    }
+
     interface PlayAudioCallback {
         void writeMixData(byte[] mixData, int totalReadLength);
 
@@ -374,7 +410,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
                 }
 
                 try {
-                    mixData(srcFis, coverFis, srcVolume, coverVolume, new PlayAudioCallback() {
+                    mixData(srcFis, coverFis, srcVolume, coverVolume, isLoopToCover, getFileDataSize(coverFis), new PlayAudioCallback() {
                         @Override
                         public void writeMixData(byte[] mixData, int totalReadLength) {
                             AudioPlayerMixer.this.currentReadLength = totalReadLength;
@@ -401,27 +437,75 @@ public class AudioPlayerMixer extends IAudioPlayer {
          * 合成音频
          */
         private void mixData(RandomAccessFile srcFis, RandomAccessFile coverFis,
-                             float volumeAudio1, float volumeAudio2, PlayAudioCallback playAudioCallback) {
+                             float volumeAudio1, float volumeAudio2, boolean isLoopToCover, int coverSize, PlayAudioCallback playAudioCallback) {
             MultiAudioMixer mix = AudioMixUtil.getAudioMixer();
 
             byte[] srcBuffer = new byte[2048];
             byte[] coverBuffer = new byte[2048];
 
-            int totalReadLength = 0;
+            if (coverSize <= 0) {
+                return;
+            }
+
+            int seekSize = 0;
+            int tempSize = 0;
             int length;
+            boolean isTail = false;
+            boolean isReadCover = true;
 
             try {
                 while ((length = srcFis.read(srcBuffer)) != -1) {
-                    coverFis.read(coverBuffer);
+                    seekSize += length;
 
-                    totalReadLength += length;
+                    if (!isReadCover) {
+                        srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, volumeAudio1);
+                        if (playAudioCallback != null) {
+                            playAudioCallback.writeMixData(srcBuffer, seekSize);
+                        }
+                        continue;
+                    }
+
+                    coverFis.read(coverBuffer);
+                    tempSize += length;
 
                     srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, volumeAudio1);
                     coverBuffer = AudioMixUtil.changeDataWithVolume(coverBuffer, volumeAudio2);
-
                     byte[] mixData = mix.mixRawAudioBytes(new byte[][]{srcBuffer, coverBuffer});
                     if (playAudioCallback != null) {
-                        playAudioCallback.writeMixData(mixData, totalReadLength);
+                        playAudioCallback.writeMixData(mixData, seekSize);
+                    }
+
+                    /**
+                     * 到尾部了
+                     */
+                    if (isTail) {
+                        isTail = false;
+
+                        coverBuffer = new byte[2048];
+                        srcBuffer = new byte[2048];
+
+                        Log.e("Mix", "背景乐到尾了！");
+                        if (isLoopToCover) { // 循环模式时重新开始
+                            seekFile(0, coverFis);
+                            Log.e("Mix", "背景乐启动循环模式！");
+                        } else { // 停读背景乐
+                            isReadCover = false;
+                            Log.e("Mix", "背景乐启动停读模式！");
+                        }
+
+                        continue;
+                    }
+
+                    /**
+                     * 是否快到尾部了 放在read后面会舍弃第一次读流大小验证
+                     */
+                    int remainSize = coverSize - tempSize;
+                    if (remainSize <= coverBuffer.length) {
+                        coverBuffer = new byte[remainSize];
+                        srcBuffer = new byte[remainSize];
+                        tempSize = 0;
+                        isTail = true;
+                        Log.e("Mix", "背景乐就快到尾了！");
                     }
                 }
 
