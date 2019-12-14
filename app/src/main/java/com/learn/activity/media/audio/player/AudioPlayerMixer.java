@@ -199,6 +199,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
             return;
         }
 
+        // TODO: 2019-12-14 线程通信
+
         seekFile(seekTime, srcFis);
         seekFile(seekTime, coverFis);
     }
@@ -404,32 +406,29 @@ public class AudioPlayerMixer extends IAudioPlayer {
         public void run() {
             mAudioTrack.play();
 
-            while (true) {
-                if (mThreadExitFlag == true) {
-                    break;
-                }
+            if (mThreadExitFlag == true) {
+                return;
+            }
 
-                try {
-                    mixData(srcFis, coverFis, srcVolume, coverVolume, isLoopToCover, getFileDataSize(coverFis), new PlayAudioCallback() {
-                        @Override
-                        public void writeMixData(byte[] mixData, int totalReadLength) {
-                            AudioPlayerMixer.this.currentReadLength = totalReadLength;
+            try {
+                mixData(srcFis, coverFis, srcVolume, coverVolume, isLoopToCover, getFileDataSize(coverFis), new PlayAudioCallback() {
+                    @Override
+                    public void writeMixData(byte[] mixData, int totalReadLength) {
+                        AudioPlayerMixer.this.currentReadLength = totalReadLength;
 
-                            mAudioTrack.write(mixData, 0, mixData.length);
-                        }
+                        mAudioTrack.write(mixData, 0, mixData.length);
+                    }
 
-                        @Override
-                        public void writeDone() {
-                            mAudioTrack.stop();
-                            AudioPlayerMixer.this.playFinish();
-                        }
-                    });
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    mAudioTrack.stop();
-                    AudioPlayerMixer.this.playFinish();
-                    break;
-                }
+                    @Override
+                    public void writeDone() {
+                        mAudioTrack.stop();
+                        AudioPlayerMixer.this.playFinish();
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                mAudioTrack.stop();
+                AudioPlayerMixer.this.playFinish();
             }
         }
 

@@ -12,6 +12,7 @@ import android.support.v4.content.FileProvider;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.frank.callback.AudioEditImpl;
@@ -39,8 +40,11 @@ public class AudioEditActivity extends BaseActivity {
     private final int MSG_BEGIN = 11;
     private final int MSG_PROGRESS = 12;
     private final int MSG_FINISH = 13;
+    private final int MSG_PLAYER_TIME = 21;
 
     private TextView tv_path_1, tv_path_2, tv_path_3, tv_log;
+    private SeekBar seek_bar_time;
+    private TextView tv_start_time, tv_end_time;
     private int mCurPickBtnId;
 
     private String mCurPath = "/storage/emulated/0/AudioEdit/audio/out.wav";
@@ -71,6 +75,13 @@ public class AudioEditActivity extends BaseActivity {
                     showProgress(false);
                     updateLog(false);
                     break;
+
+                case MSG_PLAYER_TIME:
+                    int[] times = (int[]) msg.obj;
+                    tv_start_time.setText(TimeUtil.secToTime(times[0]));
+                    tv_end_time.setText(TimeUtil.secToTime(times[1]));
+                    break;
+
                 default:
                     break;
             }
@@ -95,6 +106,10 @@ public class AudioEditActivity extends BaseActivity {
             mHandler.obtainMessage(MSG_FINISH).sendToTarget();
         }
     };
+    /**
+     * 临时变量：总时长
+     */
+    private int tempTotalTime;
 
     public static Uri fromFile(Context context, File file) {
         if (context == null || file == null) {
@@ -131,6 +146,9 @@ public class AudioEditActivity extends BaseActivity {
         tv_path_2 = findViewById(R.id.tv_path_2);
         tv_path_3 = findViewById(R.id.tv_path_3);
         tv_log = findViewById(R.id.tv_log);
+        seek_bar_time = findViewById(R.id.seek_bar_time);
+        tv_start_time = findViewById(R.id.tv_start_time);
+        tv_end_time = findViewById(R.id.tv_end_time);
     }
 
     @Override
@@ -153,6 +171,27 @@ public class AudioEditActivity extends BaseActivity {
             @Override
             public void onClick(View v) {
                 pickAudioFile(v.getId());
+            }
+        });
+
+        seek_bar_time.setMax(100);
+        seek_bar_time.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //SeekBar 滑动时的回调函数，其中 fromUser 为 true 时是手动调节
+                if (fromUser) {
+                    mAudioPlayer.seek((int) (progress * tempTotalTime / 100f));
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //SeekBar 开始滑动的的回调函数
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //SeekBar 停止滑动的回调函数
             }
         });
     }
@@ -348,6 +387,9 @@ public class AudioEditActivity extends BaseActivity {
             mAudioPlayer.addPlayerCallback(new IAudioPlayer.AudioPlayerCallback() {
                 @Override
                 public void playProgress(int totalTime, int playTime) {
+                    tempTotalTime = totalTime;
+                    seek_bar_time.setProgress((int) (playTime * 100f / totalTime));
+                    mHandler.obtainMessage(MSG_PLAYER_TIME, new int[]{playTime, totalTime}).sendToTarget();
                     Log.d("onPeriodicNotification", "totalTime:" + totalTime + "  playTime：" + playTime);
                 }
             });
