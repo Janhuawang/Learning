@@ -24,6 +24,9 @@ import com.learn.util.TimeUtil;
 import com.medialib.audioedit.bean.AudioMsg;
 import com.medialib.audioedit.util.FileUtils;
 import com.medialib.audioedit.util.ToastUtil;
+import com.medialib.audioeditc.AudioMain;
+import com.medialib.audioeditc.HandleCallback;
+import com.medialib.audioeditc.MixParam;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -157,6 +160,7 @@ public class AudioEditActivity extends BaseActivity {
         findViewById(R.id.btn_cut).setOnClickListener(this);
         findViewById(R.id.btn_insert).setOnClickListener(this);
         findViewById(R.id.tv_play).setOnClickListener(this);
+        findViewById(R.id.tv_done).setOnClickListener(this);
         findViewById(R.id.btn_fade_in).setOnClickListener(this);
         findViewById(R.id.btn_fade_out).setOnClickListener(this);
         findViewById(R.id.btn_cycle).setOnClickListener(this);
@@ -231,6 +235,11 @@ public class AudioEditActivity extends BaseActivity {
             case R.id.tv_play: // 播放
                 playAudio();
                 break;
+
+            case R.id.tv_done: // 合并
+                done();
+                break;
+
         }
     }
 
@@ -368,6 +377,56 @@ public class AudioEditActivity extends BaseActivity {
         intent.setType("audio/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_AUDIO_CODE);
+    }
+
+    /**
+     * 完成操作
+     */
+    private void done() {
+        String path1 = tv_path_1.getText().toString();
+        String path2 = tv_path_2.getText().toString();
+
+        if (TextUtils.isEmpty(path1) || TextUtils.isEmpty(path2)) {
+            ToastUtil.showToast("音频路径为空");
+            return;
+        }
+
+        String path3 = null;
+        File file = new File(path1);
+        if (file.isFile()) {
+            int index = path1.lastIndexOf(".");
+            if (index > -1) {
+                String before = path1.substring(0, index);
+                String after = path1.substring(index, path1.length());
+                path3 = before + "_Mix" + System.currentTimeMillis() + after;
+            }
+
+            MixParam mixParam = new MixParam();
+            mixParam.testStr = "hello!!!";
+            mixParam.fadeIn = true;
+            mixParam.fadeInSec = 10;
+            mixParam.fadeOut = true;
+            mixParam.fadeOutSec = 20;
+            mixParam.loop = true;
+            mixParam.startSec = 10;
+            mixParam.volumeRate = 1.0f;
+            AudioMain.mixAudio(path1, path2, path3, mixParam, new HandleCallback() {
+                @Override
+                public void onBegin() {
+                    mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
+                }
+
+                @Override
+                public void onCallback(String log, int type) {
+
+                }
+
+                @Override
+                public void onEnd(int result) {
+                    mHandler.obtainMessage(MSG_FINISH).sendToTarget();
+                }
+            });
+        }
     }
 
     /**

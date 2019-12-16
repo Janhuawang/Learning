@@ -157,6 +157,18 @@
                 android:textSize="16dp" />
 
             <TextView
+                android:id="@+id/tv_done"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/grey"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="完成"
+                android:textColor="#000000"
+                android:textSize="16dp" />
+
+            <TextView
                 android:id="@+id/tv_log"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
