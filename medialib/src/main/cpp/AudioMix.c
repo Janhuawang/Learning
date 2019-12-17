@@ -3,60 +3,139 @@
 //  AudioMixDemo
 //
 //  Created by lych on 2019/12/13.
-//  Copyright © 2019 Levi. All rights reserved.
+//  Copyright © 2019 UMU. All rights reserved.
 //
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include "AudioMix.h"
+#include "Wav.h"
+#include "Caff.h"
 
 #define MAX_BUFFER_SIZE 1024
 #define MIX_RESULT_ERROR (-1)
 #define MAX_SHORT  32767
 #define MIN_SHORT  (-32768)
-#define MIN_DATA(a,b) ((a) > (b) ? (b) : (a))
 
+struct MIX_VALUE
+{
+    long mixLen;
+    long fadeInLen;
+    long fadeOutLen;
+    long repeatPos;
+};
 
-int MixWavFile(FILE *ifp,char *mixFile,char *outputFile,MPARAM param);
-void AMix(short i,short m,short *o,double *f);
+typedef struct MIX_VALUE MIXVALUE;
+
+int MixCaffFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param);
+
+int MixWavFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param);
+void AMixBytes(short i,short m,short *o,double *f);
+void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue);
 void AFadeLengthAdjust(MPARAM param,long *fadeInLen,long *fadeOutLen,long mixDataLen);
 void FileCopy(FILE *sfp, FILE *dfp, long length);
 
 int MixFile(char *inputFile, char *mixFile,char *outputFile,MPARAM param)
 {
     int ret = 0;
-    FILE *ifp = fopen(inputFile, "rb");
+    FILE *ifp = NULL,*mfp = NULL,*ofp = NULL;
+    ifp = fopen(inputFile, "rb");
     if (ifp == NULL) {
         ret = MIX_RESULT_ERROR;
         goto MIX_DONE;
     }
     
+    mfp = fopen(mixFile, "rb");
+    if (mfp == NULL) {
+        ret = MIX_RESULT_ERROR;
+        goto MIX_DONE;
+    }
+
+    ofp = fopen(outputFile, "wb");
+    if (ofp == NULL) {
+        ret = MIX_RESULT_ERROR;
+        goto MIX_DONE;
+    }
+
     if (isWAVFile(ifp)) {
-        ret = MixWavFile(ifp, mixFile, outputFile,param);
+        ret = MixWavFile(ifp, mfp, ofp,param);
+    } else if (isCAFFile(ifp)) {
+        ret = MixCaffFile(ifp, mfp, ofp,param);
     }
     
 MIX_DONE:
     if (ifp) {
         fclose(ifp);
     }
+    if (mfp) {
+        fclose(mfp);
+    }
+    if (ofp) {
+        fclose(ofp);
+    }
     return ret;
 }
 
-int MixWavFile(FILE *ifp,char *mixFile,char *outputFile,MPARAM param) {
+int MixCaffFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param)
+{
     int ret = 0;
-    FILE *mfp, *ofp = NULL;
-    mfp = fopen(mixFile, "rb");
-    if (mfp == NULL) {
-        ret = MIX_RESULT_ERROR;
-        goto WAV_DONE;
+    CAF_HEADER iHeader;
+    CFReadHeader(ifp, &iHeader, sizeof(iHeader));
+    // 大端字节序
+    Cbool isBigEndian = (iHeader.mFileVersion != 1 ? Ctrue : Cfalse);
+    CAF_FORMAT iFormat;
+    CFReadFormat(ifp, &iFormat, sizeof(iFormat), isBigEndian);
+    CAF_CHUNK iData;
+    CFReadDataChunk(ifp, &iData, sizeof(iData), isBigEndian);
+    
+    WAVE_HEADER mHeader;
+    WFReadHeader(mfp, &mHeader, sizeof(mHeader));
+    WAVE_FORMAT mFormat;
+    WFReadFormat(mfp, &mFormat, sizeof(mFormat));
+    WAVE_DATA mData;
+    WFReadData(mfp, &mData, sizeof(mData));
+    
+    fpos_t inPos,mixPos;
+    fgetpos(ifp, &inPos);
+    fgetpos(mfp, &mixPos);
+    
+    long dwSize = 0;
+    if (iData.mChunkSize.hi > 0) {
+        dwSize = iData.mChunkSize.hi;
+    } else {
+        fseek(ifp, 0, SEEK_END);
+        dwSize = ftell(ifp);
+        fseek(ifp, inPos, SEEK_SET);
     }
     
-    ofp = fopen(outputFile, "wb");
-    if (ofp == NULL) {
-        ret = MIX_RESULT_ERROR;
-        goto WAV_DONE;
+    // Mix start offset, copy origin data.
+    long startPos = param.startSec * iFormat.mSampleRate * iFormat.mChannelsPerFrame*iFormat.mBitsPerChannel/8 + inPos;
+    if (startPos > 0) {
+        fseek(ifp, 0, SEEK_SET);
+        FileCopy(ifp, ofp,startPos);
     }
+
+    long fadeInLen = 0, fadeOutLen = 0,mixDataLen = 0;
+    if (param.fadeIn) {
+        fadeInLen = param.fadeInSec * mFormat.dwBitRate;
+    }
+    if (param.fadeOut) {
+        fadeOutLen = param.fadeOutSec *mFormat.dwBitRate;
+    }
+    if (param.fadeIn || param.fadeOut) {
+        mixDataLen = param.loop ? (dwSize - startPos) : MIN_DATA((dwSize - startPos), mData.dwSize);
+        AFadeLengthAdjust(param, &fadeInLen, &fadeOutLen,mixDataLen);
+    }
+    
+    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,mixPos};
+    AMixFileData(ifp, mfp, ofp, param, v);
+        
+    return ret;
+}
+
+int MixWavFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param) {
+    int ret = 0;
     
     WAVE_HEADER iHeader;
     WFReadHeader(ifp, &iHeader, sizeof(iHeader));
@@ -85,7 +164,6 @@ int MixWavFile(FILE *ifp,char *mixFile,char *outputFile,MPARAM param) {
         FileCopy(ifp, ofp,startPos);
     }
         
-// TODO 渐入 渐出 音量比. 读写优化
     long fadeInLen = 0, fadeOutLen = 0,mixDataLen = 0;
     if (param.fadeIn) {
         fadeInLen = param.fadeInSec * mFormat.dwBitRate;
@@ -98,33 +176,42 @@ int MixWavFile(FILE *ifp,char *mixFile,char *outputFile,MPARAM param) {
         AFadeLengthAdjust(param, &fadeInLen, &fadeOutLen,mixDataLen);
     }
     
+    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,dataPos};
+    AMixFileData(ifp, mfp, ofp, param, v);
+        
+    return ret;
+}
+
+void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue)
+{
     // Mix
     double f=1;
     short data1,data2,data_mix = 0;
     size_t ret1,ret2,ret3;
     long mixingDataLen = 0;
     
+// TODO 读写优化
     Cbool hasOrigin = Cfalse;
     while (!feof(ifp)) {
         ret1 = fread(&data1,2,1,ifp);
         ret2 = fread(&data2,2,1,mfp);
         if (ret2 == 0 && param.loop) {
-            fseek(mfp, dataPos, SEEK_SET);
+            fseek(mfp, mValue.repeatPos, SEEK_SET);
             ret2 = fread(&data2,2,1,mfp);
         }
         if (ret2 > 0) {
             data2 *= param.volumeRate; // 音量比
             // fade in
-            if (param.fadeIn && fadeInLen > 0 && mixingDataLen <= fadeInLen) {
-                data2 = (data2 * mixingDataLen) / fadeOutLen;
+            if (param.fadeIn && mValue.fadeInLen > 0 && mixingDataLen <= mValue.fadeInLen) {
+                data2 = (data2 * mixingDataLen) / mValue.fadeInLen;
             }
             
             // fade out
-            if (param.fadeOut && fadeOutLen > 0 && (mixDataLen - mixingDataLen) <= fadeOutLen) {
-                data2 = (data2 * (mixDataLen - mixingDataLen)) / fadeOutLen;
+            if (param.fadeOut && mValue.fadeOutLen > 0 && (mValue.mixLen - mixingDataLen) <= mValue.fadeOutLen) {
+                data2 = (data2 * (mValue.mixLen - mixingDataLen)) / mValue.fadeOutLen;
             }
             mixingDataLen += 2;
-            AMix(data1, data2, &data_mix, &f);
+            AMixBytes(data1, data2, &data_mix, &f);
         } else {
             data_mix = data1;
             hasOrigin = Ctrue;
@@ -136,18 +223,9 @@ int MixWavFile(FILE *ifp,char *mixFile,char *outputFile,MPARAM param) {
     if (hasOrigin == Ctrue) {
         FileCopy(ifp, ofp, Uint32_MAX);
     }
-        
-WAV_DONE:
-    if (mfp) {
-        fclose(mfp);
-    }
-    if (ofp) {
-        fclose(ofp);
-    }
-    return ret;
 }
 
-void AMix(short i,short m,short *o,double *f)
+void AMixBytes(short i,short m,short *o,double *f)
 {
     int temp = (i + m)*(*f);
     if (temp > MAX_SHORT) {

@@ -3,6 +3,7 @@ package com.learn.activity.media.audio.player;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
+import android.os.Handler;
 import android.util.Log;
 
 import com.medialib.audioedit.bean.Audio;
@@ -13,6 +14,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.util.concurrent.locks.LockSupport;
 
 /**
  * 播放器
@@ -66,9 +68,21 @@ public class AudioPlayerMixer extends IAudioPlayer {
      */
     private boolean mThreadExitFlag;
     /**
-     * 当前读取大小
+     * 线程暂停态
      */
-    private int currentReadLength;
+    private boolean mThreadWaitState;
+    /**
+     * 当前读取文件大小
+     */
+    private volatile int currentReadLength;
+    /**
+     * 初始位置的时间
+     */
+    private volatile int initialSeekTime;
+    /**
+     * 当前位置的时间
+     */
+    private volatile int currentSeekTime;
     /**
      * 音频播放时间回调
      */
@@ -77,6 +91,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 背景乐是否设置循环模式
      */
     private boolean isLoopToCover;
+
 
     @Override
     public void setMixPath(String srcFilePath, String coverFilePath) {
@@ -130,7 +145,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
         setPlayState(PlayState.MPS_PREPARE);
 
-        seek(1);
+        seekFile(0, srcFis);
+        seekFile(0, coverFis);
 
         return true;
     }
@@ -162,6 +178,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
 
         setPlayState(PlayState.MPS_PLAYING);
+        seek(AudioPlayerMixer.this.currentSeekTime);
         startThread();
 
         return true;
@@ -175,7 +192,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
         if (mPlayState == PlayState.MPS_PLAYING) {
             setPlayState(PlayState.MPS_PAUSE);
-            stopThread();
+            pauseThread();
         }
 
         return true;
@@ -188,21 +205,49 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
 
         setPlayState(PlayState.MPS_PREPARE);
+        AudioPlayerMixer.this.currentSeekTime = 0; // seek到0
         stopThread();
+        if (audioPlayerCallback != null) { // seek到0
+            audioPlayerCallback.playProgress(timeMillis, 0);
+        }
 
         return true;
     }
 
     @Override
-    public void seek(int seekTime) {
+    public void seek(final int seekTime) {
         if (mBReady == false) {
             return;
         }
 
-        // TODO: 2019-12-14 线程通信
+        mThreadWaitState = true;
 
-        seekFile(seekTime, srcFis);
-        seekFile(seekTime, coverFis);
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                AudioPlayerMixer.this.initialSeekTime = seekTime;
+                seekFile(seekTime, srcFis);
+                seekFile(seekTime, coverFis);
+
+                mThreadWaitState = false;
+                LockSupport.unpark(mPlayAudioThread);
+            }
+        }, 20);
+
+    }
+
+    @Override
+    public int getPlayState() {
+        return mPlayState;
+    }
+
+    /**
+     * 当前播放状态
+     *
+     * @param state
+     */
+    private void setPlayState(int state) {
+        this.mPlayState = state;
     }
 
     @Override
@@ -214,8 +259,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 播放结束
      */
     private void playFinish() {
-        closeFile();
-
         if (mPlayState != PlayState.MPS_PAUSE) {
             setPlayState(PlayState.MPS_PREPARE);
         }
@@ -277,8 +320,9 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
             @Override
             public void onPeriodicNotification(AudioTrack track) {
-                if (audioPlayerCallback != null && currentReadLength > 0) {
-                    audioPlayerCallback.playProgress(timeMillis, (int) (currentReadLength * 1f / sampleSize));
+                if (audioPlayerCallback != null && currentReadLength > 0) { // 因为获取的流是上一个已经完成的数据，所以需要增加1秒。
+                    AudioPlayerMixer.this.currentSeekTime = (int) (currentReadLength * 1f / sampleSize) + AudioPlayerMixer.this.initialSeekTime + 1;
+                    audioPlayerCallback.playProgress(timeMillis, Math.min(timeMillis, AudioPlayerMixer.this.currentSeekTime));
                 }
             }
         });
@@ -300,15 +344,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     /**
-     * 当前播放状态
-     *
-     * @param state
-     */
-    private void setPlayState(int state) {
-        this.mPlayState = state;
-    }
-
-    /**
      * 开启线程
      */
     private void startThread() {
@@ -320,12 +355,21 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     /**
+     * 暂停线程
+     */
+    private void pauseThread() {
+        if (mPlayAudioThread != null) {
+            mThreadExitFlag = true;
+            mPlayAudioThread = null;
+        }
+    }
+
+    /**
      * 停止线程
      */
     private void stopThread() {
         if (mPlayAudioThread != null) {
             mThreadExitFlag = true;
-            mPlayAudioThread.interrupt();
             mPlayAudioThread = null;
         }
     }
@@ -362,20 +406,34 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     /**
-     * 指定文件读流位置
+     * 根据时间指定流位置
      *
      * @param seekTime
      * @param file
      */
     private void seekFile(int seekTime, RandomAccessFile file) {
         if (file != null && seekTime >= 0) {
-            final int seekPos = AudioMixUtil.getPositionFromWave(seekTime, sampleRate, channel, bitNum);
+
+            final int seekPos = getSeekPos(seekTime, file);
             try {
                 file.seek(this.isWave ? WAVE_HEAD_SIZE + seekPos : seekPos);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    /**
+     * 根据时间计算流位置
+     *
+     * @param seekTime
+     * @param file
+     * @return
+     */
+    private int getSeekPos(int seekTime, RandomAccessFile file) {
+        final int seekPos = AudioMixUtil.getPositionFromWave(seekTime, sampleRate, channel, bitNum);
+        int maxPos = getFileDataSize(file);
+        return seekPos / maxPos == 1 ? maxPos : seekPos % maxPos;
     }
 
     /**
@@ -398,6 +456,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
     interface PlayAudioCallback {
         void writeMixData(byte[] mixData, int totalReadLength);
 
+        void resetMixData();
+
         void writeDone();
     }
 
@@ -406,17 +466,17 @@ public class AudioPlayerMixer extends IAudioPlayer {
         public void run() {
             mAudioTrack.play();
 
-            if (mThreadExitFlag == true) {
-                return;
-            }
-
             try {
                 mixData(srcFis, coverFis, srcVolume, coverVolume, isLoopToCover, getFileDataSize(coverFis), new PlayAudioCallback() {
                     @Override
                     public void writeMixData(byte[] mixData, int totalReadLength) {
                         AudioPlayerMixer.this.currentReadLength = totalReadLength;
-
                         mAudioTrack.write(mixData, 0, mixData.length);
+                    }
+
+                    @Override
+                    public void resetMixData() {
+                        mAudioTrack.flush();
                     }
 
                     @Override
@@ -449,11 +509,24 @@ public class AudioPlayerMixer extends IAudioPlayer {
             int seekSize = 0;
             int tempSize = 0;
             int length;
-            boolean isTail = false;
-            boolean isReadCover = true;
+            boolean isTail = false; // 是否到尾部了
+            boolean isReadCover = true; // 是否读取背景乐
 
             try {
                 while ((length = srcFis.read(srcBuffer)) != -1) {
+                    if (mThreadExitFlag == true) { // 退出
+                        break;
+                    }
+                    if (mThreadWaitState) { // 暂停
+                        seekSize = 0;
+                        tempSize = 0;
+                        length = 0;
+                        isTail = false;
+                        isReadCover = false;
+                        playAudioCallback.resetMixData();
+                        LockSupport.park(); // 等待Seek完后继续执行。
+                    }
+
                     seekSize += length;
 
                     if (!isReadCover) {

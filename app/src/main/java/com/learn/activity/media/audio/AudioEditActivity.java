@@ -160,6 +160,9 @@ public class AudioEditActivity extends BaseActivity {
         findViewById(R.id.btn_cut).setOnClickListener(this);
         findViewById(R.id.btn_insert).setOnClickListener(this);
         findViewById(R.id.tv_play).setOnClickListener(this);
+        findViewById(R.id.tv_pause).setOnClickListener(this);
+        findViewById(R.id.tv_stop).setOnClickListener(this);
+
         findViewById(R.id.tv_done).setOnClickListener(this);
         findViewById(R.id.btn_fade_in).setOnClickListener(this);
         findViewById(R.id.btn_fade_out).setOnClickListener(this);
@@ -183,9 +186,6 @@ public class AudioEditActivity extends BaseActivity {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 //SeekBar 滑动时的回调函数，其中 fromUser 为 true 时是手动调节
-                if (fromUser) {
-                    mAudioPlayer.seek((int) (progress * tempTotalTime / 100f));
-                }
             }
 
             @Override
@@ -196,6 +196,7 @@ public class AudioEditActivity extends BaseActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 //SeekBar 停止滑动的回调函数
+                mAudioPlayer.seek((int) (seekBar.getProgress() * tempTotalTime / 100f));
             }
         });
     }
@@ -233,7 +234,23 @@ public class AudioEditActivity extends BaseActivity {
                 break;
 
             case R.id.tv_play: // 播放
-                playAudio();
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.play();
+                } else {
+                    playAudio();
+                }
+                break;
+
+            case R.id.tv_pause: // 暂停
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.pause();
+                }
+                break;
+
+            case R.id.tv_stop: // 停止
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.stop();
+                }
                 break;
 
             case R.id.tv_done: // 合并

@@ -47,6 +47,14 @@ public abstract class IAudioPlayer {
 
     public abstract void seek(int seekTime); // 单位秒
 
+    /**
+     * 获取播放器当前状态
+     *
+     * @return
+     * @see com.learn.activity.media.audio.player.PlayState
+     */
+    public abstract int getPlayState();
+
     public abstract void addPlayerCallback(AudioPlayerCallback audioPlayerCallback);
 
     public interface AudioPlayerCallback {

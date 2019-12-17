@@ -3,7 +3,7 @@
 //  AudioMixDemo
 //
 //  Created by lych on 2019/12/13.
-//  Copyright © 2019 Levi. All rights reserved.
+//  Copyright © 2019 UMU. All rights reserved.
 //
 
 #ifndef AudioMix_h
@@ -12,7 +12,7 @@
 extern "C" {
 #endif
 
-#include "Wav.h"
+#include "Macro.h"
 
 struct MIX_PARAM
 {

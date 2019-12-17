@@ -3,7 +3,7 @@
 //  AudioMixDemo
 //
 //  Created by lych on 2019/12/13.
-//  Copyright © 2019 Levi. All rights reserved.
+//  Copyright © 2019 UMU. All rights reserved.
 //
 
 #ifndef Wav_h
@@ -13,16 +13,10 @@ extern "C" {
 #endif
 
 #include <stdio.h>
-
-#define Uint32_MAX   4294967295U
-typedef unsigned int Uint32;
-typedef enum {
-    Ctrue = 1,
-    Cfalse = 0,
-}Cbool;
+#include "Macro.h"
 
 /**
- * WAV文件头44个字节
+ * WAV文件头
  */
 struct RIFF_CHUNK  //头信息 12字节
 {

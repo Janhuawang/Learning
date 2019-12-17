@@ -3,7 +3,7 @@
 //  AudioMixDemo
 //
 //  Created by lych on 2019/12/13.
-//  Copyright © 2019 Levi. All rights reserved.
+//  Copyright © 2019 UMU. All rights reserved.
 //
 
 #include "Wav.h"
@@ -11,10 +11,10 @@
 #include <string.h>
 #include <ctype.h>
 
-const char *riffTag = "riff";
-const char *wavTag = "wave";
-const char *fmtTag = "fmt ";
-const char *dataTag = "data";
+const char *WRiffTag = "riff";
+const char *WaveTag = "wave";
+const char *WFmtTag = "fmt ";
+const char *WDataTag = "data";
 
 Cbool isWAVFile(FILE *file)
 {
@@ -22,8 +22,8 @@ Cbool isWAVFile(FILE *file)
     if (file) {
         WAVE_HEADER riff;
         WFReadHeader(file, &riff, sizeof(riff));
-        if (strncasecmp(riff.riff,riffTag,4) == 0 &&
-            strncasecmp(riff.riffType, wavTag,4) == 0) {
+        if (strncasecmp(riff.riff,WRiffTag,4) == 0 &&
+            strncasecmp(riff.riffType, WaveTag,4) == 0) {
             ret = Ctrue;
         }
         fseek(file, 0, SEEK_SET);
@@ -47,7 +47,7 @@ int WFReadFormat(FILE *file, WAVE_FORMAT *format,size_t size)
     if (file && format) {
         size_t ret = fread(format, size, 1, file);
         if (ret == 1 &&
-            strncasecmp(format->fccid,fmtTag,4) == 0) {
+            strncasecmp(format->fccid,WFmtTag,4) == 0) {
             return 0;
         }
     }
@@ -60,7 +60,7 @@ int WFReadData(FILE *file, WAVE_DATA *data,size_t size)
         while (!feof(file)) {
             size_t ret = fread(data, size, 1, file);
             if (ret == 1) {
-                if (strncasecmp(data->fccid, dataTag,4) == 0) {
+                if (strncasecmp(data->fccid, WDataTag,4) == 0) {
                     return 0;
                 } else {
                     fseek(file, data->dwSize, SEEK_CUR);
