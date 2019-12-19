@@ -80,6 +80,38 @@
 
             </LinearLayout>
 
+            <!--Seek条音量-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp">
+
+                <TextView
+                    android:id="@+id/tv_start_volume"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="0" />
+
+                <SeekBar
+                    android:id="@+id/seek_bar_volume"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1" />
+
+                <TextView
+                    android:id="@+id/tv_end_volume"
+                    android:layout_width="42dp"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:text="100" />
+
+            </LinearLayout>
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -103,12 +135,12 @@
                     android:text="淡出" />
 
                 <Button
-                    android:id="@+id/btn_cycle"
+                    android:id="@+id/btn_config"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
                     android:layout_weight="1"
-                    android:text="循环" />
+                    android:text="bgm配置" />
 
             </LinearLayout>
 

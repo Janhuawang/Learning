@@ -9,9 +9,15 @@ import com.medialib.audioedit.util.MultiAudioMixer;
 public class AudioMixUtil {
 
     /**
-     * 改变音量
+     * 改变音量 0.1 - 1
      */
     public static byte[] changeDataWithVolume(byte[] buffer, float volumeValue) {
+        if (volumeValue <= 0) {
+            volumeValue = 0.1f;
+        }
+        if (volumeValue >= 1) {
+            return buffer;
+        }
         for (int i = 0; i < buffer.length; i = i + 2) {
             int value = ByteUtil.byte2Short(buffer[i + 1], buffer[i]);
             int tempValue = value;
@@ -38,7 +44,7 @@ public class AudioMixUtil {
     }
 
     /**
-     * 获取wave文件某个时间对应的数据位置
+     * 时间转数据位置
      *
      * @param time       时间
      * @param sampleRate 采样率
@@ -46,7 +52,7 @@ public class AudioMixUtil {
      * @param bitNum     采样位数
      * @return
      */
-    public static int getPositionFromWave(float time, int sampleRate, int channels, int bitNum) {
+    public static int timeToPosition(float time, int sampleRate, int channels, int bitNum) {
         int byteNum = bitNum / 8;
         int position = (int) (time * sampleRate * channels * byteNum);
 

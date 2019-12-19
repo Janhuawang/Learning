@@ -1,6 +1,6 @@
 //
 //  AudioMix.c
-//  AudioMixDemo
+//  UMU
 //
 //  Created by lych on 2019/12/13.
 //  Copyright © 2019 UMU. All rights reserved.
@@ -32,9 +32,9 @@ int MixCaffFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param);
 
 int MixWavFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param);
 void AMixBytes(short i,short m,short *o,double *f);
-void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue);
 void AFadeLengthAdjust(MPARAM param,long *fadeInLen,long *fadeOutLen,long mixDataLen);
 void FileCopy(FILE *sfp, FILE *dfp, long length);
+void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue);
 
 int MixFile(char *inputFile, char *mixFile,char *outputFile,MPARAM param)
 {
@@ -189,34 +189,38 @@ void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue)
     short data1,data2,data_mix = 0;
     size_t ret1,ret2,ret3;
     long mixingDataLen = 0;
+    short iBuf[MAX_BUFFER_SIZE] = {0}, mBuf[MAX_BUFFER_SIZE] = {0},oBuf[MAX_BUFFER_SIZE] = {0};
     
-// TODO 读写优化
     Cbool hasOrigin = Cfalse;
     while (!feof(ifp)) {
-        ret1 = fread(&data1,2,1,ifp);
-        ret2 = fread(&data2,2,1,mfp);
+        ret2 = fread(mBuf,2,MAX_BUFFER_SIZE,mfp);
         if (ret2 == 0 && param.loop) {
             fseek(mfp, mValue.repeatPos, SEEK_SET);
-            ret2 = fread(&data2,2,1,mfp);
+            ret2 = fread(mBuf,2,MAX_BUFFER_SIZE,mfp);
         }
+        
         if (ret2 > 0) {
-            data2 *= param.volumeRate; // 音量比
-            // fade in
-            if (param.fadeIn && mValue.fadeInLen > 0 && mixingDataLen <= mValue.fadeInLen) {
-                data2 = (data2 * mixingDataLen) / mValue.fadeInLen;
+            ret1 = fread(iBuf,2,ret2,ifp);
+            for (int i = 0; i<ret2; i++) {
+                data1 = iBuf[i];
+                data2 = mBuf[i] * param.volumeRate; // 音量比
+                // fade in
+                if (param.fadeIn && mValue.fadeInLen > 0 && mixingDataLen <= mValue.fadeInLen) {
+                    data2 = (data2 * mixingDataLen) / mValue.fadeInLen;
+                }
+                
+                // fade out
+                if (param.fadeOut && mValue.fadeOutLen > 0 && (mValue.mixLen - mixingDataLen) <= mValue.fadeOutLen) {
+                    data2 = (data2 * (mValue.mixLen - mixingDataLen)) / mValue.fadeOutLen;
+                }
+                mixingDataLen += 2;
+                AMixBytes(data1, data2, &data_mix, &f);
+                oBuf[i] = data_mix;
             }
-            
-            // fade out
-            if (param.fadeOut && mValue.fadeOutLen > 0 && (mValue.mixLen - mixingDataLen) <= mValue.fadeOutLen) {
-                data2 = (data2 * (mValue.mixLen - mixingDataLen)) / mValue.fadeOutLen;
-            }
-            mixingDataLen += 2;
-            AMixBytes(data1, data2, &data_mix, &f);
+            ret3 = fwrite(oBuf, 2, ret2, ofp);
         } else {
-            data_mix = data1;
             hasOrigin = Ctrue;
         }
-        ret3 = fwrite(&data_mix, 2, 1, ofp);
         if (hasOrigin == Ctrue) {break;} // do copy.
     }
     // Copy remain data.

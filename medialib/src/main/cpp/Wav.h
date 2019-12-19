@@ -1,6 +1,6 @@
 //
 //  Wav.h
-//  AudioMixDemo
+//  UMU
 //
 //  Created by lych on 2019/12/13.
 //  Copyright © 2019 UMU. All rights reserved.

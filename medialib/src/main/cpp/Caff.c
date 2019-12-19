@@ -1,6 +1,6 @@
 //
 //  Caff.c
-//  AudioMixDemo
+//  UMU
 //
 //  Created by lych on 2019/12/16.
 //  Copyright © 2019 UMU. All rights reserved.
@@ -110,24 +110,6 @@ int CFReadTagChunk(FILE *file, CAF_CHUNK *data,size_t size,Cbool isBigEndian,con
                         // do somthing.
                     }
                     fseek(file, data->mChunkSize.hi, SEEK_CUR);
-                }
-            } else {
-                break;
-            }
-        }
-    }
-    return -1;
-}
-
-int CFReadTag(FILE *file, const char *tag)
-{
-    if (file && tag) {
-        CAF_CHUNK chunk = {0};
-        while (!feof(file)) {
-            size_t ret = fread(&chunk, sizeof(chunk), 1, file);
-            if (ret == 1) {
-                if (strncasecmp(chunk.type, tag,4) == 0) {
-                    return 0;
                 }
             } else {
                 break;

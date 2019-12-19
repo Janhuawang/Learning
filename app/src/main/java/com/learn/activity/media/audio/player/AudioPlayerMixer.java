@@ -4,9 +4,9 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.os.Handler;
+import android.text.TextUtils;
 import android.util.Log;
 
-import com.medialib.audioedit.bean.Audio;
 import com.medialib.audioedit.util.FileUtils;
 import com.medialib.audioedit.util.MultiAudioMixer;
 
@@ -17,7 +17,7 @@ import java.io.RandomAccessFile;
 import java.util.concurrent.locks.LockSupport;
 
 /**
- * 播放器
+ * 流播放器
  * 作者：wjh on 2019-12-13 13:05
  */
 public class AudioPlayerMixer extends IAudioPlayer {
@@ -35,7 +35,13 @@ public class AudioPlayerMixer extends IAudioPlayer {
     private int sampleRate;
     private int channel;
     private int bitNum;
-    private int sampleSize;
+    /**
+     * 一秒的字节大小
+     */
+    private volatile int sampleSize;
+    /**
+     * 总时长
+     */
     private int timeMillis;
 
     /**
@@ -63,6 +69,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 音量比例 默认是1
      */
     private float srcVolume = 1f, coverVolume = 1f;
+    private float tempVolume = this.coverVolume;
     /**
      * 线程退出态
      */
@@ -88,14 +95,59 @@ public class AudioPlayerMixer extends IAudioPlayer {
      */
     private AudioPlayerCallback audioPlayerCallback;
     /**
-     * 背景乐是否设置循环模式
+     * 是否设置背景乐为循环模式
      */
-    private boolean isLoopToCover;
+    private boolean isLoopWithCover;
+    /**
+     * 背景乐路径
+     */
+    private String coverFilePath;
+    /**
+     * 插入时间长
+     */
+    private volatile int insertPoint;
+    private volatile int insertTime;
+    /**
+     * 当前是否有背景音乐
+     */
+    private volatile boolean hasCoverFis;
+    /**
+     * 背景音大小
+     */
+    private volatile int coverSize;
 
+    /**
+     * 淡入状态
+     */
+    private volatile boolean isFadeIn;
+    /**
+     * 淡出状态
+     */
+    private volatile boolean isFadeOut;
+
+    /**
+     * 淡入数据位置
+     */
+    private volatile int fadeInStartTime;
+    private volatile int fadeInEndTime;
+    /**
+     * 淡出数据位置
+     */
+    private volatile int fadeOutStartTime;
+    private volatile int fadeOutEndTime;
+
+    /**
+     * 淡入音量渐变值
+     */
+    private volatile float fadeInGradientVolume;
+    /**
+     * 淡出音量渐变值
+     */
+    private volatile float fadeOutGradientVolume;
 
     @Override
-    public void setMixPath(String srcFilePath, String coverFilePath) {
-        if (!FileUtils.checkFileExist(srcFilePath) || !FileUtils.checkFileExist(coverFilePath)) {
+    public void setSrcPath(String srcFilePath) {
+        if (!FileUtils.checkFileExist(srcFilePath)) {
             return;
         }
 
@@ -111,16 +163,44 @@ public class AudioPlayerMixer extends IAudioPlayer {
         // 创建输入流
         try {
             srcFis = new RandomAccessFile(srcFilePath, "rw");
-            coverFis = new RandomAccessFile(coverFilePath, "rw");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
     }
 
     @Override
-    public void setVolume(float srcVolume, float coverVolume) {
-        this.srcVolume = srcVolume;
+    public void setCoverPath(String coverFilePath) {
+        if (!FileUtils.checkFileExist(coverFilePath)) {
+            this.hasCoverFis = false;
+            this.coverSize = 0;
+            return;
+        }
+
+        // 创建输入流
+        try {
+            if (coverFis != null && !TextUtils.isEmpty(this.coverFilePath) && this.coverFilePath.equals(coverFilePath)) {
+                return;
+            }
+
+            coverFis = new RandomAccessFile(coverFilePath, "rw");
+            this.hasCoverFis = true;
+            this.coverSize = getFileDataSize(coverFis);
+            this.coverFilePath = coverFilePath;
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void setInsertTime(int insertTime) {
+        this.insertTime = insertTime;
+        this.insertPoint = AudioMixUtil.timeToPosition(insertTime, sampleRate, channel, bitNum);
+    }
+
+    @Override
+    public void setBgmVolume(float coverVolume) {
         this.coverVolume = coverVolume;
+        this.tempVolume = coverVolume;
     }
 
     @Override
@@ -129,8 +209,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     @Override
-    public void setLoopToCover(boolean isLoop) {
-        this.isLoopToCover = isLoop;
+    public void setLoopWithCover(boolean isLoop) {
+        this.isLoopWithCover = isLoop;
     }
 
     @Override
@@ -176,10 +256,11 @@ public class AudioPlayerMixer extends IAudioPlayer {
         if (mBReady == false) {
             return false;
         }
-
-        setPlayState(PlayState.MPS_PLAYING);
-        seek(AudioPlayerMixer.this.currentSeekTime);
-        startThread();
+        if (mPlayState != PlayState.MPS_PLAYING) {
+            setPlayState(PlayState.MPS_PLAYING);
+            seek(AudioPlayerMixer.this.currentSeekTime);
+            startThread();
+        }
 
         return true;
     }
@@ -232,8 +313,29 @@ public class AudioPlayerMixer extends IAudioPlayer {
                 mThreadWaitState = false;
                 LockSupport.unpark(mPlayAudioThread);
             }
-        }, 20);
+        }, 150);  // delayMillis > 1000/DENOTE = 100毫秒读取数据的时间
 
+    }
+
+    @Override
+    public void updateConfig(boolean isFadeIn, int fadeInTime, boolean isFadeOut, int fadeOutTime) {
+        this.isFadeIn = isFadeIn;
+        this.fadeInStartTime = 0;
+        this.fadeInEndTime = fadeInStartTime + fadeInTime;
+
+        this.isFadeOut = isFadeOut;
+        this.fadeOutStartTime = timeMillis - fadeOutTime;
+        this.fadeOutEndTime = timeMillis;
+
+        fadeInGradientVolume = tempVolume / (fadeInEndTime - fadeInStartTime);
+        fadeOutGradientVolume = tempVolume / (fadeOutEndTime - fadeOutStartTime);
+
+        if (fadeInGradientVolume <= 0) {
+            this.isFadeIn = false;
+        }
+        if (fadeOutGradientVolume <= 0) {
+            this.isFadeOut = false;
+        }
     }
 
     @Override
@@ -431,7 +533,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * @return
      */
     private int getSeekPos(int seekTime, RandomAccessFile file) {
-        final int seekPos = AudioMixUtil.getPositionFromWave(seekTime, sampleRate, channel, bitNum);
+        final int seekPos = AudioMixUtil.timeToPosition(seekTime, sampleRate, channel, bitNum);
         int maxPos = getFileDataSize(file);
         return seekPos / maxPos == 1 ? maxPos : seekPos % maxPos;
     }
@@ -467,7 +569,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
             mAudioTrack.play();
 
             try {
-                mixData(srcFis, coverFis, srcVolume, coverVolume, isLoopToCover, getFileDataSize(coverFis), new PlayAudioCallback() {
+                mixData(srcFis, new PlayAudioCallback() {
                     @Override
                     public void writeMixData(byte[] mixData, int totalReadLength) {
                         AudioPlayerMixer.this.currentReadLength = totalReadLength;
@@ -495,44 +597,48 @@ public class AudioPlayerMixer extends IAudioPlayer {
         /**
          * 合成音频
          */
-        private void mixData(RandomAccessFile srcFis, RandomAccessFile coverFis,
-                             float volumeAudio1, float volumeAudio2, boolean isLoopToCover, int coverSize, PlayAudioCallback playAudioCallback) {
+        private void mixData(RandomAccessFile srcFis,
+                             PlayAudioCallback playAudioCallback) {
             MultiAudioMixer mix = AudioMixUtil.getAudioMixer();
 
-            byte[] srcBuffer = new byte[2048];
-            byte[] coverBuffer = new byte[2048];
+            final int DENOTE = 10; // 1000/DENOTE = 100毫秒读取一次数据
+            final int BUFFER_SIZE = sampleSize / DENOTE;
+            byte[] srcBuffer = new byte[BUFFER_SIZE];
+            byte[] coverBuffer = new byte[BUFFER_SIZE];
 
-            if (coverSize <= 0) {
-                return;
-            }
-
-            int seekSize = 0;
+            int seekPoint = 0;
+            int timeCounter = 0;
             int tempSize = 0;
             int length;
             boolean isTail = false; // 是否到尾部了
-            boolean isReadCover = true; // 是否读取背景乐
+            boolean hasReached; // 是否已经读完一次
 
             try {
                 while ((length = srcFis.read(srcBuffer)) != -1) {
                     if (mThreadExitFlag == true) { // 退出
                         break;
                     }
-                    if (mThreadWaitState) { // 暂停
-                        seekSize = 0;
+                    if (mThreadWaitState) { // 暂停态
+                        seekPoint = 0;
+                        timeCounter = 0;
                         tempSize = 0;
                         length = 0;
                         isTail = false;
-                        isReadCover = false;
+
                         playAudioCallback.resetMixData();
                         LockSupport.park(); // 等待Seek完后继续执行。
                     }
 
-                    seekSize += length;
+                    seekPoint += length;
 
+                    /**
+                     * 是否可以读取背景乐了
+                     */
+                    boolean isReadCover = hasCoverFis && coverSize > 0 && seekPoint >= insertPoint;
                     if (!isReadCover) {
-                        srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, volumeAudio1);
+                        srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, srcVolume);
                         if (playAudioCallback != null) {
-                            playAudioCallback.writeMixData(srcBuffer, seekSize);
+                            playAudioCallback.writeMixData(srcBuffer, seekPoint);
                         }
                         continue;
                     }
@@ -540,11 +646,27 @@ public class AudioPlayerMixer extends IAudioPlayer {
                     coverFis.read(coverBuffer);
                     tempSize += length;
 
-                    srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, volumeAudio1);
-                    coverBuffer = AudioMixUtil.changeDataWithVolume(coverBuffer, volumeAudio2);
+                    /**
+                     * 计算淡入淡出的音量值
+                     */
+                    if ((seekPoint - sampleSize * timeCounter) >= sampleSize) {
+                        ++timeCounter;
+
+                        int seekCoverTime = timeCounter + AudioPlayerMixer.this.initialSeekTime - insertTime;
+                        if (isFadeIn && seekCoverTime <= fadeInEndTime && seekCoverTime >= fadeInStartTime) {
+                            tempVolume = fadeInGradientVolume * seekCoverTime;
+                        } else if (isFadeOut && seekCoverTime >= fadeOutStartTime && seekCoverTime <= fadeOutEndTime) {
+                            tempVolume = fadeOutGradientVolume * (fadeOutEndTime - seekCoverTime);
+                        } else {
+                            tempVolume = coverVolume;
+                        }
+                    }
+
+                    srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, srcVolume);
+                    coverBuffer = AudioMixUtil.changeDataWithVolume(coverBuffer, tempVolume);
                     byte[] mixData = mix.mixRawAudioBytes(new byte[][]{srcBuffer, coverBuffer});
                     if (playAudioCallback != null) {
-                        playAudioCallback.writeMixData(mixData, seekSize);
+                        playAudioCallback.writeMixData(mixData, seekPoint);
                     }
 
                     /**
@@ -553,15 +675,15 @@ public class AudioPlayerMixer extends IAudioPlayer {
                     if (isTail) {
                         isTail = false;
 
-                        coverBuffer = new byte[2048];
-                        srcBuffer = new byte[2048];
+                        coverBuffer = new byte[BUFFER_SIZE];
+                        srcBuffer = new byte[BUFFER_SIZE];
 
                         Log.e("Mix", "背景乐到尾了！");
-                        if (isLoopToCover) { // 循环模式时重新开始
+                        if (isLoopWithCover) { // 循环模式时重新开始
                             seekFile(0, coverFis);
+                            hasReached = true;
                             Log.e("Mix", "背景乐启动循环模式！");
                         } else { // 停读背景乐
-                            isReadCover = false;
                             Log.e("Mix", "背景乐启动停读模式！");
                         }
 

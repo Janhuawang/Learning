@@ -1,6 +1,6 @@
 //
 //  Macro.h
-//  AudioMixDemo
+//  UMU
 //
 //  Created by lych on 2019/12/16.
 //  Copyright © 2019 UMU. All rights reserved.

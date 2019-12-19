@@ -46,7 +46,7 @@ public class AudioEditActivity extends BaseActivity {
     private final int MSG_PLAYER_TIME = 21;
 
     private TextView tv_path_1, tv_path_2, tv_path_3, tv_log;
-    private SeekBar seek_bar_time;
+    private SeekBar seek_bar_time, seek_bar_volume;
     private TextView tv_start_time, tv_end_time;
     private int mCurPickBtnId;
 
@@ -56,7 +56,7 @@ public class AudioEditActivity extends BaseActivity {
     /**
      * 音频播放器
      */
-    private IAudioPlayer mAudioPlayer;
+    private AudioPlayerMixer mAudioPlayer;
 
     /**
      * UI线程处理
@@ -150,6 +150,7 @@ public class AudioEditActivity extends BaseActivity {
         tv_path_3 = findViewById(R.id.tv_path_3);
         tv_log = findViewById(R.id.tv_log);
         seek_bar_time = findViewById(R.id.seek_bar_time);
+        seek_bar_volume = findViewById(R.id.seek_bar_volume);
         tv_start_time = findViewById(R.id.tv_start_time);
         tv_end_time = findViewById(R.id.tv_end_time);
     }
@@ -166,7 +167,7 @@ public class AudioEditActivity extends BaseActivity {
         findViewById(R.id.tv_done).setOnClickListener(this);
         findViewById(R.id.btn_fade_in).setOnClickListener(this);
         findViewById(R.id.btn_fade_out).setOnClickListener(this);
-        findViewById(R.id.btn_cycle).setOnClickListener(this);
+        findViewById(R.id.btn_config).setOnClickListener(this);
 
         tv_path_1.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -199,6 +200,25 @@ public class AudioEditActivity extends BaseActivity {
                 mAudioPlayer.seek((int) (seekBar.getProgress() * tempTotalTime / 100f));
             }
         });
+
+        seek_bar_volume.setMax(100);
+        seek_bar_volume.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                //SeekBar 滑动时的回调函数，其中 fromUser 为 true 时是手动调节
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                //SeekBar 开始滑动的的回调函数
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                //SeekBar 停止滑动的回调函数
+                mAudioPlayer.setBgmVolume(seekBar.getProgress() / 100f);
+            }
+        });
     }
 
     @Override
@@ -224,13 +244,21 @@ public class AudioEditActivity extends BaseActivity {
                 break;
 
             case R.id.btn_fade_in: // 淡入
-                fadeIn();
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.updateConfig(false, 60, false, 60);
+                }
                 break;
 
             case R.id.btn_fade_out:// 淡出
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.updateConfig(false, 60, false, 60);
+                }
                 break;
 
-            case R.id.btn_cycle:// 循环
+            case R.id.btn_config:// 配置
+                if (mAudioPlayer != null) {
+                    mAudioPlayer.updateConfig(true, 60, true, 60);
+                }
                 break;
 
             case R.id.tv_play: // 播放
@@ -289,19 +317,6 @@ public class AudioEditActivity extends BaseActivity {
                 }
             }
         }
-    }
-
-    /**
-     * 淡入
-     */
-    private void fadeIn() {
-        String path1 = tv_path_1.getText().toString();
-        if (TextUtils.isEmpty(path1)) {
-            ToastUtil.showToast("音频路径为空");
-            return;
-        }
-
-        AudioEditUtil.audioFadeInTest(path1, audioEdit);
     }
 
     /**
@@ -471,8 +486,9 @@ public class AudioEditActivity extends BaseActivity {
             });
         }
         mAudioPlayer.setWave(true);
-        mAudioPlayer.setMixPath(path1, path2);
-        mAudioPlayer.setLoopToCover(true);
+        mAudioPlayer.setSrcPath(path1);
+        mAudioPlayer.setCoverPath(path1);
+        mAudioPlayer.setInsertTime(10);
         mAudioPlayer.prepare();
         mAudioPlayer.play();
     }
