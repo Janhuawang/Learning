@@ -31,13 +31,6 @@ public abstract class IAudioPlayer {
 
     public abstract void setWave(boolean isWave);
 
-    /**
-     * 设置背景乐循环状态
-     *
-     * @param isLoop
-     */
-    public abstract void setLoopWithCover(boolean isLoop);
-
     public abstract boolean prepare();
 
     public abstract boolean release();
@@ -50,7 +43,7 @@ public abstract class IAudioPlayer {
 
     public abstract void seek(int seekTime); // 单位毫秒
 
-    public abstract void updateConfig(boolean isFadeIn, int fadeInTime,boolean isFadeOut, int fadeOutTime); // 更新配置参数
+    public abstract void updateConfig(boolean isFadeIn, int fadeInTime, boolean isFadeOut, int fadeOutTime, boolean isLoopWithCover); // 更新配置参数
 
     /**
      * 获取播放器当前状态

@@ -21,19 +21,34 @@ import java.util.concurrent.locks.LockSupport;
  * 作者：wjh on 2019-12-13 13:05
  */
 public class AudioPlayerMixer extends IAudioPlayer {
-    // wave头文件大小
+    /* wave头文件大小 */
     private static final int WAVE_HEAD_SIZE = 44;
 
     /**
      * 当前音频流文件
      */
-    private RandomAccessFile srcFis, coverFis;
+    private RandomAccessFile srcFis;
+    /**
+     * 当前背景音频流文件
+     */
+    private volatile RandomAccessFile coverFis;
+    /**
+     * 音频播放时间回调
+     */
+    private AudioPlayerCallback audioPlayerCallback;
+
 
     /**
-     * 音频格式数据
+     * 音频采样大小
      */
     private int sampleRate;
+    /**
+     * 音频通道数 1：单声道 2：双声道立体声
+     */
     private int channel;
+    /**
+     * 音频位 8、16、32
+     */
     private int bitNum;
     /**
      * 一秒的字节大小
@@ -43,6 +58,11 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 总时长
      */
     private int timeMillis;
+    /**
+     * 是否为wave格式
+     */
+    private boolean isWave;
+
 
     /**
      * 音频轨道
@@ -52,24 +72,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
      * 播放线程
      */
     private PlayAudioThread mPlayAudioThread;
-
-    /**
-     * 准备态
-     */
-    private boolean mBReady;
-    /**
-     * 当前播放状态
-     */
-    private int mPlayState = PlayState.MPS_UNINIT;
-    /**
-     * 是否为wave格式
-     */
-    private boolean isWave;
-    /**
-     * 音量比例 默认是1
-     */
-    private float srcVolume = 1f, coverVolume = 1f;
-    private float tempVolume = this.coverVolume;
     /**
      * 线程退出态
      */
@@ -79,43 +81,61 @@ public class AudioPlayerMixer extends IAudioPlayer {
      */
     private boolean mThreadWaitState;
     /**
-     * 当前读取文件大小
+     * 准备态
      */
-    private volatile int currentReadLength;
+    private boolean mBReady;
     /**
-     * 初始位置的时间
+     * 当前播放状态
      */
-    private volatile int initialSeekTime;
-    /**
-     * 当前位置的时间
-     */
-    private volatile int currentSeekTime;
-    /**
-     * 音频播放时间回调
-     */
-    private AudioPlayerCallback audioPlayerCallback;
-    /**
-     * 是否设置背景乐为循环模式
-     */
-    private boolean isLoopWithCover;
+    private int mPlayState = PlayState.MPS_UNINIT;
+
+
     /**
      * 背景乐路径
      */
     private String coverFilePath;
     /**
-     * 插入时间长
-     */
-    private volatile int insertPoint;
-    private volatile int insertTime;
-    /**
      * 当前是否有背景音乐
      */
     private volatile boolean hasCoverFis;
     /**
-     * 背景音大小
+     * 背景乐数据大小 如果是wav格式的话会把头数据减掉
      */
-    private volatile int coverSize;
+    private volatile int coverAudioDataSize;
 
+
+    /**
+     * 初始位置的时间
+     */
+    private volatile int initialSeekTime;
+    /**
+     * 当前读取文件的大小
+     */
+    private volatile int currentSeekSize;
+    /**
+     * 当前Seek到位置时间
+     */
+    private volatile int currentSeekTime;
+
+
+    /**
+     * 当前音量值 默认是1
+     */
+    private float srcVolume = 1f, coverVolume = 1f;
+    /**
+     * 淡出淡出音量值
+     */
+    private float tempVolume = this.coverVolume;
+
+
+    /**
+     * 插入时间点
+     */
+    private volatile int insertPoint;
+    /**
+     * 是否设置背景乐为循环模式
+     */
+    private volatile boolean isLoopWithCover = true;
     /**
      * 淡入状态
      */
@@ -125,25 +145,32 @@ public class AudioPlayerMixer extends IAudioPlayer {
      */
     private volatile boolean isFadeOut;
 
-    /**
-     * 淡入数据位置
-     */
-    private volatile int fadeInStartTime;
-    private volatile int fadeInEndTime;
-    /**
-     * 淡出数据位置
-     */
-    private volatile int fadeOutStartTime;
-    private volatile int fadeOutEndTime;
 
     /**
-     * 淡入音量渐变值
+     * 淡入开始时间点
+     */
+    private volatile int fadeInStartTime;
+    /**
+     * 淡入结束时间点
+     */
+    private volatile int fadeInEndTime;
+    /**
+     * 淡出开始时间点
+     */
+    private volatile int fadeOutStartTime;
+    /**
+     * 淡出结束时间点
+     */
+    private volatile int fadeOutEndTime;
+    /**
+     * 淡入音量渐变大小
      */
     private volatile float fadeInGradientVolume;
     /**
-     * 淡出音量渐变值
+     * 淡出音量渐变大小
      */
     private volatile float fadeOutGradientVolume;
+
 
     @Override
     public void setSrcPath(String srcFilePath) {
@@ -172,7 +199,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
     public void setCoverPath(String coverFilePath) {
         if (!FileUtils.checkFileExist(coverFilePath)) {
             this.hasCoverFis = false;
-            this.coverSize = 0;
+            this.coverAudioDataSize = 0;
             return;
         }
 
@@ -184,7 +211,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
             coverFis = new RandomAccessFile(coverFilePath, "rw");
             this.hasCoverFis = true;
-            this.coverSize = getFileDataSize(coverFis);
+            this.coverAudioDataSize = getFileDataSize(coverFis);
             this.coverFilePath = coverFilePath;
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -193,7 +220,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
     @Override
     public void setInsertTime(int insertTime) {
-        this.insertTime = insertTime;
         this.insertPoint = AudioMixUtil.timeToPosition(insertTime, sampleRate, channel, bitNum);
     }
 
@@ -206,11 +232,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
     @Override
     public void setWave(boolean isWave) {
         this.isWave = isWave;
-    }
-
-    @Override
-    public void setLoopWithCover(boolean isLoop) {
-        this.isLoopWithCover = isLoop;
     }
 
     @Override
@@ -246,6 +267,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
         closeFile();
 
         mBReady = false;
+
         setPlayState(PlayState.MPS_UNINIT);
 
         return true;
@@ -261,7 +283,6 @@ public class AudioPlayerMixer extends IAudioPlayer {
             seek(AudioPlayerMixer.this.currentSeekTime);
             startThread();
         }
-
         return true;
     }
 
@@ -270,12 +291,10 @@ public class AudioPlayerMixer extends IAudioPlayer {
         if (mBReady == false) {
             return false;
         }
-
         if (mPlayState == PlayState.MPS_PLAYING) {
             setPlayState(PlayState.MPS_PAUSE);
             pauseThread();
         }
-
         return true;
     }
 
@@ -286,8 +305,11 @@ public class AudioPlayerMixer extends IAudioPlayer {
         }
 
         setPlayState(PlayState.MPS_PREPARE);
+
         AudioPlayerMixer.this.currentSeekTime = 0; // seek到0
+
         stopThread();
+
         if (audioPlayerCallback != null) { // seek到0
             audioPlayerCallback.playProgress(timeMillis, 0);
         }
@@ -301,12 +323,12 @@ public class AudioPlayerMixer extends IAudioPlayer {
             return;
         }
 
+        AudioPlayerMixer.this.initialSeekTime = seekTime;
         mThreadWaitState = true;
 
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                AudioPlayerMixer.this.initialSeekTime = seekTime;
                 seekFile(seekTime, srcFis);
                 seekFile(seekTime, coverFis);
 
@@ -318,7 +340,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     @Override
-    public void updateConfig(boolean isFadeIn, int fadeInTime, boolean isFadeOut, int fadeOutTime) {
+    public void updateConfig(boolean isFadeIn, int fadeInTime, boolean isFadeOut, int fadeOutTime, boolean isLoopWithCover) {
         this.isFadeIn = isFadeIn;
         this.fadeInStartTime = 0;
         this.fadeInEndTime = fadeInStartTime + fadeInTime;
@@ -326,6 +348,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
         this.isFadeOut = isFadeOut;
         this.fadeOutStartTime = timeMillis - fadeOutTime;
         this.fadeOutEndTime = timeMillis;
+
+        this.isLoopWithCover = isLoopWithCover;
 
         fadeInGradientVolume = tempVolume / (fadeInEndTime - fadeInStartTime);
         fadeOutGradientVolume = tempVolume / (fadeOutEndTime - fadeOutStartTime);
@@ -422,8 +446,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
 
             @Override
             public void onPeriodicNotification(AudioTrack track) {
-                if (audioPlayerCallback != null && currentReadLength > 0) { // 因为获取的流是上一个已经完成的数据，所以需要增加1秒。
-                    AudioPlayerMixer.this.currentSeekTime = (int) (currentReadLength * 1f / sampleSize) + AudioPlayerMixer.this.initialSeekTime + 1;
+                if (audioPlayerCallback != null && currentSeekSize > 0) { // 因为获取的流是上一个已经完成的数据，所以需要增加1秒。
+                    AudioPlayerMixer.this.currentSeekTime = (int) (currentSeekSize * 1f / sampleSize) + 1;
                     audioPlayerCallback.playProgress(timeMillis, Math.min(timeMillis, AudioPlayerMixer.this.currentSeekTime));
                 }
             }
@@ -556,7 +580,7 @@ public class AudioPlayerMixer extends IAudioPlayer {
     }
 
     interface PlayAudioCallback {
-        void writeMixData(byte[] mixData, int totalReadLength);
+        void writeMixData(byte[] mixData, int srcSeekPoint);
 
         void resetMixData();
 
@@ -571,8 +595,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
             try {
                 mixData(srcFis, new PlayAudioCallback() {
                     @Override
-                    public void writeMixData(byte[] mixData, int totalReadLength) {
-                        AudioPlayerMixer.this.currentReadLength = totalReadLength;
+                    public void writeMixData(byte[] mixData, int srcSeekPoint) {
+                        AudioPlayerMixer.this.currentSeekSize = srcSeekPoint;
                         mAudioTrack.write(mixData, 0, mixData.length);
                     }
 
@@ -606,12 +630,13 @@ public class AudioPlayerMixer extends IAudioPlayer {
             byte[] srcBuffer = new byte[BUFFER_SIZE];
             byte[] coverBuffer = new byte[BUFFER_SIZE];
 
-            int seekPoint = 0;
-            int timeCounter = 0;
-            int tempSize = 0;
             int length;
-            boolean isTail = false; // 是否到尾部了
-            boolean hasReached; // 是否已经读完一次
+
+            int srcSeekPoint = AudioPlayerMixer.this.initialSeekTime * sampleSize; // 原音当前读取流位置
+            int coverSeekPoint; // 背景乐当前读流位置
+
+            int timeCounter = 0; // 时间计数器 一秒记一次
+            boolean isTail = false; // 背景乐是否已经读到了尾部
 
             try {
                 while ((length = srcFis.read(srcBuffer)) != -1) {
@@ -619,9 +644,8 @@ public class AudioPlayerMixer extends IAudioPlayer {
                         break;
                     }
                     if (mThreadWaitState) { // 暂停态
-                        seekPoint = 0;
+                        srcSeekPoint = AudioPlayerMixer.this.initialSeekTime * sampleSize;
                         timeCounter = 0;
-                        tempSize = 0;
                         length = 0;
                         isTail = false;
 
@@ -629,34 +653,32 @@ public class AudioPlayerMixer extends IAudioPlayer {
                         LockSupport.park(); // 等待Seek完后继续执行。
                     }
 
-                    seekPoint += length;
+                    srcSeekPoint += length;
+                    coverSeekPoint = srcSeekPoint - insertPoint;
 
-                    /**
-                     * 是否可以读取背景乐了
-                     */
-                    boolean isReadCover = hasCoverFis && coverSize > 0 && seekPoint >= insertPoint;
-                    if (!isReadCover) {
+                    boolean isCanReadCover = hasCoverFis && coverAudioDataSize > 0 && coverSeekPoint >= 0; // 是否可以读取背景乐
+                    isCanReadCover = isCanReadCover && coverSeekPoint > insertPoint && isLoopWithCover; // 是否继续读取背景乐
+                    if (!isCanReadCover) {
                         srcBuffer = AudioMixUtil.changeDataWithVolume(srcBuffer, srcVolume);
                         if (playAudioCallback != null) {
-                            playAudioCallback.writeMixData(srcBuffer, seekPoint);
+                            playAudioCallback.writeMixData(srcBuffer, srcSeekPoint);
                         }
                         continue;
                     }
 
                     coverFis.read(coverBuffer);
-                    tempSize += length;
 
                     /**
                      * 计算淡入淡出的音量值
                      */
-                    if ((seekPoint - sampleSize * timeCounter) >= sampleSize) {
+                    if ((coverSeekPoint - sampleSize * timeCounter) >= sampleSize) {
                         ++timeCounter;
 
-                        int seekCoverTime = timeCounter + AudioPlayerMixer.this.initialSeekTime - insertTime;
-                        if (isFadeIn && seekCoverTime <= fadeInEndTime && seekCoverTime >= fadeInStartTime) {
-                            tempVolume = fadeInGradientVolume * seekCoverTime;
-                        } else if (isFadeOut && seekCoverTime >= fadeOutStartTime && seekCoverTime <= fadeOutEndTime) {
-                            tempVolume = fadeOutGradientVolume * (fadeOutEndTime - seekCoverTime);
+                        int coverSeekTime = coverSeekPoint / sampleSize;
+                        if (isFadeIn && coverSeekTime <= fadeInEndTime && coverSeekTime >= fadeInStartTime) {
+                            tempVolume = fadeInGradientVolume * coverSeekTime;
+                        } else if (isFadeOut && coverSeekTime >= fadeOutStartTime && coverSeekTime <= fadeOutEndTime) {
+                            tempVolume = fadeOutGradientVolume * (fadeOutEndTime - coverSeekTime);
                         } else {
                             tempVolume = coverVolume;
                         }
@@ -666,44 +688,35 @@ public class AudioPlayerMixer extends IAudioPlayer {
                     coverBuffer = AudioMixUtil.changeDataWithVolume(coverBuffer, tempVolume);
                     byte[] mixData = mix.mixRawAudioBytes(new byte[][]{srcBuffer, coverBuffer});
                     if (playAudioCallback != null) {
-                        playAudioCallback.writeMixData(mixData, seekPoint);
+                        playAudioCallback.writeMixData(mixData, srcSeekPoint);
                     }
 
                     /**
-                     * 到尾部了
+                     * 过尾部了 还原buffer大小
                      */
                     if (isTail) {
                         isTail = false;
 
                         coverBuffer = new byte[BUFFER_SIZE];
                         srcBuffer = new byte[BUFFER_SIZE];
-
-                        Log.e("Mix", "背景乐到尾了！");
-                        if (isLoopWithCover) { // 循环模式时重新开始
-                            seekFile(0, coverFis);
-                            hasReached = true;
-                            Log.e("Mix", "背景乐启动循环模式！");
-                        } else { // 停读背景乐
-                            Log.e("Mix", "背景乐启动停读模式！");
-                        }
-
+                        seekFile(0, coverFis);
+                        Log.e("Mix", "背景乐完成循环一次！");
                         continue;
                     }
 
                     /**
-                     * 是否快到尾部了 放在read后面会舍弃第一次读流大小验证
+                     * 是否快到尾部了
                      */
-                    int remainSize = coverSize - tempSize;
+                    int remainSize = coverAudioDataSize - srcSeekPoint % coverAudioDataSize;
                     if (remainSize <= coverBuffer.length) {
                         coverBuffer = new byte[remainSize];
                         srcBuffer = new byte[remainSize];
-                        tempSize = 0;
                         isTail = true;
-                        Log.e("Mix", "背景乐就快到尾了！");
+                        Log.e("Mix", "背景乐准备循环一次！");
                     }
                 }
 
-                playAudioCallback.writeDone();
+                playAudioCallback.writeDone(); // 播放结束
             } catch (Exception ex) {
                 ex.printStackTrace();
             }

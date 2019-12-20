@@ -245,19 +245,19 @@ public class AudioEditActivity extends BaseActivity {
 
             case R.id.btn_fade_in: // 淡入
                 if (mAudioPlayer != null) {
-                    mAudioPlayer.updateConfig(false, 60, false, 60);
+                    mAudioPlayer.updateConfig(false, 60, false, 60, false);
                 }
                 break;
 
             case R.id.btn_fade_out:// 淡出
                 if (mAudioPlayer != null) {
-                    mAudioPlayer.updateConfig(false, 60, false, 60);
+                    mAudioPlayer.updateConfig(false, 60, false, 60, false);
                 }
                 break;
 
             case R.id.btn_config:// 配置
                 if (mAudioPlayer != null) {
-                    mAudioPlayer.updateConfig(true, 60, true, 60);
+                    mAudioPlayer.updateConfig(true, 60, true, 60, true);
                 }
                 break;
 
@@ -487,8 +487,8 @@ public class AudioEditActivity extends BaseActivity {
         }
         mAudioPlayer.setWave(true);
         mAudioPlayer.setSrcPath(path1);
-        mAudioPlayer.setCoverPath(path1);
-        mAudioPlayer.setInsertTime(10);
+        mAudioPlayer.setCoverPath(path2);
+        mAudioPlayer.setInsertTime(20);
         mAudioPlayer.prepare();
         mAudioPlayer.play();
     }
