@@ -9,12 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <unistd.h>
+#include <string.h>
 #include "AudioMix.h"
-#include "Wav.h"
 #include "Caff.h"
 
-#define MAX_BUFFER_SIZE 1024
-#define MIX_RESULT_ERROR (-1)
+#define A_BUFFER_SIZE 1024
+#define A_RESULT_ERROR (-1)
 #define MAX_SHORT  32767
 #define MIN_SHORT  (-32768)
 
@@ -36,25 +37,33 @@ void AFadeLengthAdjust(MPARAM param,long *fadeInLen,long *fadeOutLen,long mixDat
 void FileCopy(FILE *sfp, FILE *dfp, long length);
 void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue);
 
-int MixFile(char *inputFile, char *mixFile,char *outputFile,MPARAM param)
+int MixFile(const char *inputFile,const char *mixFile,const char *outputFile,MPARAM param)
 {
+    if (outputFile) {
+        unlink(outputFile);
+    }
     int ret = 0;
     FILE *ifp = NULL,*mfp = NULL,*ofp = NULL;
     ifp = fopen(inputFile, "rb");
     if (ifp == NULL) {
-        ret = MIX_RESULT_ERROR;
+        ret = A_RESULT_ERROR;
         goto MIX_DONE;
     }
     
     mfp = fopen(mixFile, "rb");
     if (mfp == NULL) {
-        ret = MIX_RESULT_ERROR;
+        ret = A_RESULT_ERROR;
         goto MIX_DONE;
     }
 
     ofp = fopen(outputFile, "wb");
     if (ofp == NULL) {
-        ret = MIX_RESULT_ERROR;
+        ret = A_RESULT_ERROR;
+        goto MIX_DONE;
+    }
+    
+    if (!isWAVFile(mfp)) {
+        ret = A_RESULT_ERROR;
         goto MIX_DONE;
     }
 
@@ -70,6 +79,62 @@ MIX_DONE:
     }
     if (mfp) {
         fclose(mfp);
+    }
+    if (ofp) {
+        fclose(ofp);
+    }
+    return ret;
+}
+
+int ConvertPCMtoWAV(const char *inputFile, const char *outFile,WAVE_FORMAT *format)
+{
+    int ret = 0;
+    
+    FILE *ifp = NULL,*ofp = NULL;
+    if (inputFile && outFile && format) {
+        ifp = fopen(inputFile, "rb");
+        if (ifp == NULL) {
+            ret = A_RESULT_ERROR;
+            goto CONVERT_DONE;
+        }
+        
+        ofp = fopen(outFile, "wb");
+        if (ofp == NULL) {
+            ret = A_RESULT_ERROR;
+            goto CONVERT_DONE;
+        }
+        
+        // data pos. when need loop, do seek here.
+        fseek(ifp, 0, SEEK_END);
+        Uint32 dwSize = (Uint32)ftell(ifp);
+        fseek(ifp, 0, SEEK_SET);
+
+        WAVE_HEADER iHeader = {0};
+        memcpy(iHeader.riff,"RIFF",4);
+        memcpy(iHeader.riffType,"WAVE",4);
+        iHeader.dwSize = 36 + dwSize;
+        
+        WAVE_FORMAT iFormat = {0};
+        memcpy(&iFormat, format, sizeof(iFormat));
+        memcpy(iFormat.fccid, "fmt ", 4);
+        
+        WAVE_DATA iData = {0};
+        memcpy(iData.fccid, "data", 4);
+        iData.dwSize = dwSize;
+        
+        WFWriteHeader(ofp,&iHeader, sizeof(iHeader));
+        WFWriteFormat(ofp, &iFormat, sizeof(iFormat));
+        WFWriteData(ofp,&iData, sizeof(iData));
+
+        FileCopy(ifp, ofp,dwSize);
+
+    } else {
+        ret = A_RESULT_ERROR;
+    }
+    
+CONVERT_DONE:
+    if (ifp) {
+        fclose(ifp);
     }
     if (ofp) {
         fclose(ofp);
@@ -106,7 +171,7 @@ int MixCaffFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param)
     } else {
         fseek(ifp, 0, SEEK_END);
         dwSize = ftell(ifp);
-        fseek(ifp, inPos, SEEK_SET);
+        fseek(ifp, (long)inPos, SEEK_SET);
     }
     
     // Mix start offset, copy origin data.
@@ -128,7 +193,7 @@ int MixCaffFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param)
         AFadeLengthAdjust(param, &fadeInLen, &fadeOutLen,mixDataLen);
     }
     
-    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,mixPos};
+    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,(long)mixPos};
     AMixFileData(ifp, mfp, ofp, param, v);
         
     return ret;
@@ -176,7 +241,7 @@ int MixWavFile(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param) {
         AFadeLengthAdjust(param, &fadeInLen, &fadeOutLen,mixDataLen);
     }
     
-    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,dataPos};
+    MIXVALUE v = {mixDataLen,fadeInLen,fadeOutLen,(long)dataPos};
     AMixFileData(ifp, mfp, ofp, param, v);
         
     return ret;
@@ -189,14 +254,14 @@ void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue)
     short data1,data2,data_mix = 0;
     size_t ret1,ret2,ret3;
     long mixingDataLen = 0;
-    short iBuf[MAX_BUFFER_SIZE] = {0}, mBuf[MAX_BUFFER_SIZE] = {0},oBuf[MAX_BUFFER_SIZE] = {0};
+    short iBuf[A_BUFFER_SIZE] = {0}, mBuf[A_BUFFER_SIZE] = {0},oBuf[A_BUFFER_SIZE] = {0};
     
     Cbool hasOrigin = Cfalse;
     while (!feof(ifp)) {
-        ret2 = fread(mBuf,2,MAX_BUFFER_SIZE,mfp);
+        ret2 = fread(mBuf,2,A_BUFFER_SIZE,mfp);
         if (ret2 == 0 && param.loop) {
             fseek(mfp, mValue.repeatPos, SEEK_SET);
-            ret2 = fread(mBuf,2,MAX_BUFFER_SIZE,mfp);
+            ret2 = fread(mBuf,2,A_BUFFER_SIZE,mfp);
         }
         
         if (ret2 > 0) {
@@ -269,13 +334,13 @@ void AFadeLengthAdjust(MPARAM param,long *fadeInLen,long *fadeOutLen,long mixDat
 void FileCopy(FILE *sfp, FILE *dfp, long length)
 {
     if (sfp && dfp) {
-        char buffer[MAX_BUFFER_SIZE] = {0};
+        char buffer[A_BUFFER_SIZE] = {0};
         size_t c = 0;
-        size_t len = MIN_DATA(length,MAX_BUFFER_SIZE);
+        size_t len = MIN_DATA(length,A_BUFFER_SIZE);
         while ((c = fread(buffer, sizeof(char), len, sfp)) > 0 ) {
             fwrite(buffer, sizeof(char),c, dfp);
             length -= c;
-            len = MIN_DATA(length,MAX_BUFFER_SIZE);
+            len = MIN_DATA(length,A_BUFFER_SIZE);
         }
     }
 }

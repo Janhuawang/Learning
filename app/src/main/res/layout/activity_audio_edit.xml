@@ -223,7 +223,6 @@
 
             </LinearLayout>
 
-
             <TextView
                 android:id="@+id/tv_done"
                 android:layout_width="match_parent"
@@ -233,6 +232,30 @@
                 android:gravity="center"
                 android:padding="16dp"
                 android:text="C合并完成"
+                android:textColor="#000000"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/tv_format"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/grey"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="PcmToWav"
+                android:textColor="#000000"
+                android:textSize="16dp" />
+
+            <TextView
+                android:id="@+id/tv_head_size"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/grey"
+                android:gravity="center"
+                android:padding="16dp"
+                android:text="GetWavHeadSize"
                 android:textColor="#000000"
                 android:textSize="16dp" />
 

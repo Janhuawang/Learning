@@ -165,6 +165,8 @@ public class AudioEditActivity extends BaseActivity {
         findViewById(R.id.tv_stop).setOnClickListener(this);
 
         findViewById(R.id.tv_done).setOnClickListener(this);
+        findViewById(R.id.tv_format).setOnClickListener(this);
+        findViewById(R.id.tv_head_size).setOnClickListener(this);
         findViewById(R.id.btn_fade_in).setOnClickListener(this);
         findViewById(R.id.btn_fade_out).setOnClickListener(this);
         findViewById(R.id.btn_config).setOnClickListener(this);
@@ -283,6 +285,14 @@ public class AudioEditActivity extends BaseActivity {
 
             case R.id.tv_done: // 合并
                 done();
+                break;
+
+            case R.id.tv_format: // 格式转换
+                pcmToWav();
+                break;
+
+            case R.id.tv_head_size: // 获取wav文件头大小
+                getWavHeadSize();
                 break;
 
         }
@@ -406,9 +416,61 @@ public class AudioEditActivity extends BaseActivity {
         mCurPickBtnId = viewId;
 
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setType("audio/*");
+        intent.setType("pcm/*");
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         startActivityForResult(intent, REQUEST_AUDIO_CODE);
+    }
+
+    /**
+     * 格式转换
+     */
+    private void pcmToWav() {
+        String path1 = tv_path_1.getText().toString();
+
+        if (TextUtils.isEmpty(path1)) {
+            ToastUtil.showToast("音频路径为空");
+            return;
+        }
+
+        String path3 = null;
+        File file = new File(path1);
+        if (file.isFile()) {
+            int index = path1.lastIndexOf(".");
+            if (index > -1) {
+                String before = path1.substring(0, index);
+                path3 = before + "_Format" + System.currentTimeMillis() + ".wav";
+            }
+
+            AudioMain.pcmToWav(path1, path3, new HandleCallback() {
+                @Override
+                public void onBegin() {
+                    mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
+                }
+
+                @Override
+                public void onCallback(String log, int type) {
+                }
+
+                @Override
+                public void onEnd(int result) {
+                    mHandler.obtainMessage(MSG_FINISH).sendToTarget();
+                }
+            });
+        }
+    }
+
+    /**
+     * 获取wav文件大小
+     */
+    private void getWavHeadSize() {
+        String path1 = tv_path_1.getText().toString();
+
+        if (TextUtils.isEmpty(path1)) {
+            ToastUtil.showToast("音频路径为空");
+            return;
+        }
+
+        ToastUtil.showToast("WAV SIZE:" + AudioMain.getWavFileHeadSize(path1));
     }
 
     /**

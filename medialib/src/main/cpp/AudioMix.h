@@ -13,6 +13,7 @@ extern "C" {
 #endif
 
 #include "Macro.h"
+#include "Wav.h"
 
 struct MIX_PARAM
 {
@@ -34,8 +35,13 @@ typedef struct MIX_PARAM MPARAM;
  * 混音起始位置
  * 是否循环
  */
-int MixFile(char *inputFile, char *mixFile,char *outputFile,MPARAM param);
+int MixFile(const char *inputFile,const char *mixFile,const char *outputFile,MPARAM param);
 
+/**
+ * PCM TO WAV
+ * Support PCM 小端字节序
+ */
+int ConvertPCMtoWAV(const char *inputFile, const char *outFile,WAVE_FORMAT *format);
 #ifdef __cplusplus
 }
 #endif

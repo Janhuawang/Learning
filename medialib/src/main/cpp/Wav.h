@@ -59,6 +59,7 @@ int WFWriteHeader(FILE *file, WAVE_HEADER *header,size_t size);
 int WFWriteFormat(FILE *file, WAVE_FORMAT *format,size_t size);
 int WFWriteData(FILE *file, WAVE_DATA *data,size_t size);
 
+int WFHeaderSize(const char * file,Uint32 *size);
 #ifdef __cplusplus
 }
 #endif

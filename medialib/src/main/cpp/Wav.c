@@ -96,3 +96,31 @@ int WFWriteData(FILE *file, WAVE_DATA *data,size_t size)
     }
     return -1;
 }
+
+int WFHeaderSize(const char * file,Uint32 *size)
+{
+    int ret = 0;
+    if (file) {
+        FILE *ifp = fopen(file, "rb");
+        if (ifp == NULL || (isWAVFile(ifp) == Cfalse)) {
+            if (size) *size = 0;
+            return -1;
+        }
+        WAVE_HEADER mHeader;
+        WFReadHeader(ifp, &mHeader, sizeof(mHeader));
+        WAVE_FORMAT mFormat;
+        WFReadFormat(ifp, &mFormat, sizeof(mFormat));
+        WAVE_DATA mData;
+        WFReadData(ifp, &mData, sizeof(mData));
+        // data pos. when need loop, do seek here.
+        fpos_t dataPos;
+        fgetpos(ifp, &dataPos);
+        
+        if(size) *size = (Uint32)dataPos;
+
+        if (ifp) {
+            fclose(ifp);
+        }
+    }
+    return ret;
+}

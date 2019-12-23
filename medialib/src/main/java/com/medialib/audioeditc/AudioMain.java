@@ -11,6 +11,10 @@ public class AudioMain {
 
     private native static int mix(String srcPath, String coverPath, String outputPath, MixParam mixParam);
 
+    private native static int pcm16leToWav(String pcmPath, String wavPath);
+
+    private native static int getWavHeadSize(String wavPath);
+
     public static void mixAudio(final String srcPath, final String coverPath, final String outputPath, final MixParam mixParam, final HandleCallback handleCallback) {
         if (handleCallback != null) {
             new Thread(new Runnable() {
@@ -23,4 +27,22 @@ public class AudioMain {
             }).start();
         }
     }
+
+    public static void pcmToWav(final String pcmPath, final String wavPath, final HandleCallback handleCallback) {
+        if (handleCallback != null) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    handleCallback.onBegin();
+                    int result = pcm16leToWav(pcmPath, wavPath);
+                    handleCallback.onEnd(result);
+                }
+            }).start();
+        }
+    }
+
+    public static int getWavFileHeadSize(final String wavPath) {
+        return getWavHeadSize(wavPath);
+    }
+
 }

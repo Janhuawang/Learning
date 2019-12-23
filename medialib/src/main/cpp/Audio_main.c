@@ -3,11 +3,10 @@
 #include <string.h>
 #include <malloc.h>
 #include "AudioMix.h"
+#include "Wav.h"
 
 
-JNIEXPORT jint
-
-JNICALL
+JNIEXPORT jint JNICALL
 Java_com_medialib_audioeditc_AudioMain_mix(JNIEnv *env, jclass mainObj, jstring srcFile,
                                            jstring coverFile,
                                            jstring outPutFile, jobject paramObj) {
@@ -68,8 +67,41 @@ Java_com_medialib_audioeditc_AudioMain_mix(JNIEnv *env, jclass mainObj, jstring 
     p.startSec = startSec;
     p.volumeRate = volumeRate;
 
-    MixFile(srcFileChar, coverFileChar, outPutFileChar, p);
-    return 1;
+    return MixFile(srcFileChar, coverFileChar, outPutFileChar, p);
 }
+
+JNIEXPORT jint JNICALL
+Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj, jstring pcmPath,
+                                                    jstring wavPath) {
+
+    char *pcmPathChar = (*env)->GetStringUTFChars(env, pcmPath, NULL);
+    char *wavPathChar = (*env)->GetStringUTFChars(env, wavPath, NULL);
+
+    WAVE_FORMAT format = {0};
+    format.dwSize = 16;
+    format.wFormatTag = 1;
+    format.wChannels = 2;
+    format.dwSamplesPerSec = 44100;
+    format.wBitsPerSample = 16;
+    format.wBlock = format.wChannels * format.wBitsPerSample / 8;
+    format.dwBitRate = format.dwSamplesPerSec * format.wChannels * format.wBitsPerSample / 8;
+    return ConvertPCMtoWAV(pcmPathChar, wavPathChar, &format);
+}
+
+
+JNIEXPORT jint JNICALL
+Java_com_medialib_audioeditc_AudioMain_getWavHeadSize(JNIEnv *env, jclass mainObj,
+                                                      jstring wavPath) {
+
+    char *wavPathChar = (*env)->GetStringUTFChars(env, wavPath, NULL);
+    Uint32 size = 0;
+    int result = WFHeaderSize(wavPathChar, &size);
+    if (result == 0) {
+        return size;
+    } else {
+        return -1;
+    }
+}
+
 
 
