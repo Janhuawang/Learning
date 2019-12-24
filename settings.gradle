@@ -1,1 +1,1 @@
-include ':app', ':buildsrc', ':customplugin', ':ffmpeg', ':ffmpeglib', ':ffmpegcommand', ':medialib', ':base'
+include ':app',   ':customplugin', ':ffmpeg', ':ffmpeglib', ':ffmpegcommand', ':medialib', ':base'

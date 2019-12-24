@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-apply from: "custom.gradle"
+//apply from: "custom.gradle"
 
 android {
     compileSdkVersion rootProject.ext.compileSdkVersion as Integer
