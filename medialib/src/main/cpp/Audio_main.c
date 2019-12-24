@@ -80,9 +80,9 @@ Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj,
     WAVE_FORMAT format = {0};
     format.dwSize = 16;
     format.wFormatTag = 1;
-    format.wChannels = 2;
-    format.dwSamplesPerSec = 44100;
-    format.wBitsPerSample = 16;
+    format.wChannels = 1;
+    format.dwSamplesPerSec = 16000;
+    format.wBitsPerSample = 32;
     format.wBlock = format.wChannels * format.wBitsPerSample / 8;
     format.dwBitRate = format.dwSamplesPerSec * format.wChannels * format.wBitsPerSample / 8;
     return ConvertPCMtoWAV(pcmPathChar, wavPathChar, &format);
