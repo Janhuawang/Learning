@@ -279,7 +279,7 @@ void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue)
         
         if (ret2 > 0) {
             ret1 = fread(iBuf,2,ret2,ifp);
-            for (int i = 0; i<ret2; i++) {
+            for (int i = 0; i<ret1; i++) {
                 data1 = iBuf[i];
                 data2 = mBuf[i] * param.volumeRate; // 音量比
                 // fade in
@@ -295,7 +295,7 @@ void AMixFileData(FILE *ifp,FILE *mfp,FILE *ofp,MPARAM param,MIXVALUE mValue)
                 AMixBytes(data1, data2, &data_mix, &f);
                 oBuf[i] = data_mix;
             }
-            ret3 = fwrite(oBuf, 2, ret2, ofp);
+            ret3 = fwrite(oBuf, 2, ret1, ofp);
         } else {
             hasOrigin = Ctrue;
         }
