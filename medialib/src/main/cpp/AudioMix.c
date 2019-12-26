@@ -86,7 +86,7 @@ MIX_DONE:
     return ret;
 }
 
-int ConvertPCMtoWAV(const char *inputFile, const char *outFile,WAVE_FORMAT *format)
+int ConvertPCMtoWAV(const char *inputFile, const char *outFile,Cbool smallEndia,WAVE_FORMAT *format)
 {
     int ret = 0;
     
@@ -126,8 +126,21 @@ int ConvertPCMtoWAV(const char *inputFile, const char *outFile,WAVE_FORMAT *form
         WFWriteFormat(ofp, &iFormat, sizeof(iFormat));
         WFWriteData(ofp,&iData, sizeof(iData));
 
-        FileCopy(ifp, ofp,dwSize);
-
+        if (smallEndia == Ctrue) {
+            FileCopy(ifp, ofp,dwSize);
+        } else {
+            int iBuf[A_BUFFER_SIZE] = {0};
+            size_t count = 0;
+            while (!feof(ifp)) {
+                count = fread(iBuf,4,A_BUFFER_SIZE,ifp);
+                if (count > 0) {
+                    for (int i = 0; i<count; i++) {
+                        iBuf[i] = BLSWAP_16(iBuf[i]);
+                    }
+                    fwrite(iBuf, 4, count, ofp);
+                }
+            }
+        }
     } else {
         ret = A_RESULT_ERROR;
     }

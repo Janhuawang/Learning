@@ -11,7 +11,7 @@ public class AudioMain {
 
     private native static int mix(String srcPath, String coverPath, String outputPath, MixParam mixParam);
 
-    private native static int pcm16leToWav(String pcmPath, String wavPath);
+    private native static int pcm16leToWav(String pcmPath, String wavPath, int byteType); // 1:小端字节 0：大端字节
 
     private native static int getWavHeadSize(String wavPath);
 
@@ -34,7 +34,7 @@ public class AudioMain {
                 @Override
                 public void run() {
                     handleCallback.onBegin();
-                    int result = pcm16leToWav(pcmPath, wavPath);
+                    int result = pcm16leToWav(pcmPath, wavPath, 1);
                     handleCallback.onEnd(result);
                 }
             }).start();

@@ -41,7 +41,7 @@ int MixFile(const char *inputFile,const char *mixFile,const char *outputFile,MPA
  * PCM TO WAV
  * Support PCM 小端字节序
  */
-int ConvertPCMtoWAV(const char *inputFile, const char *outFile,WAVE_FORMAT *format);
+int ConvertPCMtoWAV(const char *inputFile, const char *outFile,Cbool smallEndia,WAVE_FORMAT *format);
 #ifdef __cplusplus
 }
 #endif

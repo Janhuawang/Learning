@@ -4,6 +4,7 @@
 #include <malloc.h>
 #include "AudioMix.h"
 #include "Wav.h"
+#include "Conversion.h"
 
 
 JNIEXPORT jint JNICALL
@@ -72,7 +73,7 @@ Java_com_medialib_audioeditc_AudioMain_mix(JNIEnv *env, jclass mainObj, jstring 
 
 JNIEXPORT jint JNICALL
 Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj, jstring pcmPath,
-                                                    jstring wavPath) {
+                                                    jstring wavPath,jint byteType) {
 
     char *pcmPathChar = (*env)->GetStringUTFChars(env, pcmPath, NULL);
     char *wavPathChar = (*env)->GetStringUTFChars(env, wavPath, NULL);
@@ -82,10 +83,12 @@ Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj,
     format.wFormatTag = 1;
     format.wChannels = 1;
     format.dwSamplesPerSec = 16000;
-    format.wBitsPerSample = 32;
+    format.wBitsPerSample = 16;
     format.wBlock = format.wChannels * format.wBitsPerSample / 8;
     format.dwBitRate = format.dwSamplesPerSec * format.wChannels * format.wBitsPerSample / 8;
-    return ConvertPCMtoWAV(pcmPathChar, wavPathChar, &format);
+    return ConvertPCMtoWAV(pcmPathChar, wavPathChar, byteType, &format);
+
+//    return pcmToWav(pcmPathChar, wavPathChar);
 }
 
 

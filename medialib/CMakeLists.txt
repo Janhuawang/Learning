@@ -19,6 +19,7 @@ add_library( # Sets the name of the library.
         src/main/cpp/AudioMix.c
         src/main/cpp/Wav.c
         src/main/cpp/Caff.c
+        src/main/cpp/Conversion.c
         )
 
 # 导入系统库
