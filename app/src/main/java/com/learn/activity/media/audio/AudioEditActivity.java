@@ -342,6 +342,8 @@ public class AudioEditActivity extends BaseActivity {
         }
 
         mHandler.obtainMessage(MSG_BEGIN).sendToTarget();
+        path1 = "/storage/emulated/0/Android/data/cn.tc.umu/cache/audio/wav/audio_1577347114730.wav";
+        path2 = "/storage/emulated/0/Android/data/cn.tc.umu/files/Download/statics%2Faudio%2F%E5%89%8D%E5%A5%8F%2F8.%E6%98%9F%E7%A9%BA.wav";
 
         AudioEditUtil.onMixAudio(AudioEditActivity.this, path1, path2, 1f, 0.2f);
     }
@@ -470,6 +472,7 @@ public class AudioEditActivity extends BaseActivity {
             return;
         }
 
+        path1 = "/storage/emulated/0/Android/data/cn.tc.umu/files/Download/statics%2Faudio%2F%E5%89%8D%E5%A5%8F%2F8.%E6%98%9F%E7%A9%BA.wav";
         ToastUtil.showToast("WAV SIZE:" + AudioMain.getWavFileHeadSize(path1));
     }
 
@@ -497,13 +500,19 @@ public class AudioEditActivity extends BaseActivity {
 
             MixParam mixParam = new MixParam();
             mixParam.testStr = "hello!!!";
-            mixParam.fadeIn = true;
-            mixParam.fadeInSec = 10;
-            mixParam.fadeOut = true;
-            mixParam.fadeOutSec = 20;
-            mixParam.loop = true;
-            mixParam.startSec = 10;
-            mixParam.volumeRate = 1.0f;
+            mixParam.fadeIn = false;
+            mixParam.fadeInSec = 1;
+            mixParam.fadeOut = false;
+            mixParam.fadeOutSec = 2;
+            mixParam.loop = false;
+            mixParam.startSec = 0;
+            mixParam.volumeRate = 0.7f;
+
+            path1 = "/storage/emulated/0/wav/src2.wav";
+            path2 = "/storage/emulated/0/wav/cover2.wav";
+//            path2 = "/storage/emulated/0/Android/data/cn.tc.umu/files/Download/statics%2Faudio%2F%E5%89%8D%E5%A5%8F%2F8.%E6%98%9F%E7%A9%BA.wav";
+//            path2 = "/storage/emulated/0/Android/data/cn.tc.umu/files/Download/statics%2Faudio%2F%E5%89%8D%E5%A5%8F%2F6.%E5%B0%8F%E9%BC%93%E7%82%B9.wav";
+
             AudioMain.mixAudio(path1, path2, path3, mixParam, new HandleCallback() {
                 @Override
                 public void onBegin() {
