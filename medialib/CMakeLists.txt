@@ -1,34 +1,45 @@
+# For more information about using CMake with Android Studio, read the
+# documentation: https://d.android.com/studio/projects/add-native-code.html
+
+# Sets the minimum version of CMake required to build the native library.
+
 cmake_minimum_required(VERSION 3.4.1)
 
 # 支持c++编译
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-# Creates and names a library, sets it as either STATIC
-# or SHARED, and provides the relative paths to its source code.
-# You can define multiple libraries, and CMake builds them for you.
-# Gradle automatically packages shared libraries with your APK.
+#define cpp source path
+set(SRC_DIR src/main/cpp/lamemp3)
 
-add_library( # Sets the name of the library.
-        media-audio-edit
+#set *.h source path
+include_directories(src/main/cpp/lamemp3)
 
-        # Sets the library as a shared library.
-        SHARED
+#set cpp source path
+aux_source_directory(src/main/cpp/lamemp3 SRC_LIST)
 
-        # Provides a relative path to your source file(s).
-        src/main/cpp/Audio_main.c
-        src/main/cpp/AudioMix.c
-        src/main/cpp/Wav.c
-        src/main/cpp/Caff.c
-        src/main/cpp/Conversion.c
-        )
+#set *.so files output path，please add this before add_library
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/src/main/jniLibs/${ANDROID_ABI})
 
-# 导入系统库
-find_library(log-lib log)
-find_library(android-lib android)
+#add cpp files into library
+add_library(lame-mp3-utils SHARED
+        src/main/cpp/lame-mp3-utils.cpp
+        src/main/cpp/lame_util.c
+        ${SRC_LIST})
 
-target_link_libraries( # 多库之间链接
-        media-audio-edit
+find_library( # Sets the name of the path variable.
+        log-lib
 
-        ${log-lib}
-        ${android-lib}
-        )
+        # Specifies the name of the NDK library that
+        # you want CMake to locate.
+        log )
+
+# Specifies libraries CMake should link to your target library. You
+# can link multiple libraries, such as libraries you define in this
+# build script, prebuilt third-party libraries, or system libraries.
+
+target_link_libraries( # Specifies the target library.
+        lame-mp3-utils
+#        mp3lame
+        # Links the target library to the log library
+        # included in the NDK.
+        ${log-lib} )

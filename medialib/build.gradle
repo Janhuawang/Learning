@@ -13,16 +13,23 @@ android {
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
-        ndk { abiFilters 'armeabi-v7a' }
+//        ndk { abiFilters 'armeabi-v7a' }
 //        ndk { abiFilters 'armeabi-v7a', 'arm64-v8a' }
 
 
         externalNativeBuild {
-            cmake {
+            /*cmake {
                 cppFlags "-frtti -fexceptions"
                 abiFilters 'armeabi-v7a'
 //                abiFilters 'armeabi-v7a', 'arm64-v8a'
                 arguments "-DANDROID_STL=gnustl_static"
+            }*/
+
+            cmake {
+                //设置cpp配置参数，c文件请使用CFlags
+                cppFlags ""
+                //设置生成指定ABI版本的so库
+                abiFilters 'armeabi-v7a','arm64-v8a' //,'x86','x86_64','armeabi','mips','mips64'
             }
         }
     }
@@ -39,7 +46,6 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
-
 
     sourceSets {
         main {
