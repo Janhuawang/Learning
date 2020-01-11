@@ -5,11 +5,13 @@
 #include"android/log.h"
 
 #define LOG_TAG "lameUtils"
-#define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define BUFFER_SIZE 8192
 
 static lame_global_flags *lame = NULL;
 long nowConvertBytes = 0;
+
+static int m_inChannel = 0;
+static int m_inBitRate = 0;
 
 void resetLame() {
     if (lame != NULL) {
@@ -32,8 +34,18 @@ unsigned char *convertJByteArrayToChars(JNIEnv *env, jbyteArray bytearray) {
 }
 
 void lameInit(jint inSampleRate,
-              jint channel, jint mode, jint outSampleRate,
+              jint channel, jint inBitRate, jint mode, jint outSampleRate,
               jint outBitRate, jint quality) {
+
+    if (channel == 0) {
+        channel = 2;
+    }
+    if (inBitRate == 0) {
+        inBitRate = 16;
+    }
+    m_inChannel = channel;
+    m_inBitRate = inBitRate;
+
     resetLame();
     lame = lame_init();
     lame_set_in_samplerate(lame, inSampleRate);
@@ -53,9 +65,10 @@ void lameInit(jint inSampleRate,
 
 extern "C" JNIEXPORT void JNICALL
 Java_jaygoo_library_converter_Mp3Converter_init(JNIEnv *env, jclass type, jint inSampleRate,
-                                                jint channel, jint mode, jint outSampleRate,
+                                                jint channel, jint inBitRate, jint mode,
+                                                jint outSampleRate,
                                                 jint outBitRate, jint quality) {
-    lameInit(inSampleRate, channel, mode, outSampleRate, outBitRate, quality);
+    lameInit(inSampleRate, channel, inBitRate, mode, outSampleRate, outBitRate, quality);
 }
 
 extern "C" JNIEXPORT
@@ -74,7 +87,12 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
     nowConvertBytes = 0;
     //if you don't init lame, it will init lame use the default value
     if (lame == NULL) {
-        lameInit(44100, 2, 0, 44100, 96, 7);
+        lameInit(44100, 2, 16, 0, 44100, 96, 7);
+    }
+    if (m_inChannel < 2) {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "单声道");
+    } else {
+        __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "多声道");
     }
 
     //convert to mp3
@@ -83,15 +101,20 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
         total += read * sizeof(short int) * 2;
         nowConvertBytes = total;
         if (read != 0) {
-            /*if(num_channels < 2){
-            int nsamples = read*4*8/16; //  int nsamples = numBytes*8/(fileFormat.mBitsPerChannel*channel);
-            write = lame_encode_buffer(lame, inputBuffer,inputBuffer, nsamples, mp3Buffer, BUFFER_SIZE);
-            }else{
-            write = lame_encode_buffer_interleaved(lame, inputBuffer, read, mp3Buffer, BUFFER_SIZE);
-            }*/
+            //  int nsamples = numBytes*8/(fileFormat.mBitsPerChannel*channel);
+            int nsamples = read * 4 * 8 / (m_inBitRate * m_inChannel);
 
-            write = lame_encode_buffer_interleaved(lame, inputBuffer, read, mp3Buffer, BUFFER_SIZE);
-            //write the converted buffer to the file
+            if (m_inChannel < 2) {
+                write = lame_encode_buffer(lame, inputBuffer, inputBuffer, nsamples, mp3Buffer,
+                                           BUFFER_SIZE);
+            } else {
+                write = lame_encode_buffer_interleaved(lame, inputBuffer, nsamples, mp3Buffer,
+                                                       BUFFER_SIZE);
+            }
+
+//            write = lame_encode_buffer_interleaved(lame, inputBuffer, read, mp3Buffer, BUFFER_SIZE);
+
+            // write the converted buffer to the file
             fwrite(mp3Buffer, sizeof(unsigned char), static_cast<size_t>(write), fMp3);
         }
         //if in the end flush
@@ -118,11 +141,14 @@ Java_jaygoo_library_converter_Mp3Converter_encode(
     jshort *j_buffer_r = env->GetShortArrayElements(buffer_r, NULL);
 
     const jsize mp3buf_size = env->GetArrayLength(mp3buf);
-    unsigned char * c_mp3buf = convertJByteArrayToChars(env, mp3buf);
-//	int result = lame_encode_buffer(lame, j_buffer_l, j_buffer_r,
-//			samples, j_mp3buf, mp3buf_size);
+    unsigned char *c_mp3buf = convertJByteArrayToChars(env, mp3buf);
 
-    int result = lame_encode_buffer_interleaved(lame, j_buffer_l, samples, c_mp3buf, mp3buf_size);
+    int result;
+    if (m_inChannel < 2) {
+        result = lame_encode_buffer(lame, j_buffer_l, j_buffer_r, samples, c_mp3buf, mp3buf_size);
+    } else {
+        result = lame_encode_buffer_interleaved(lame, j_buffer_l, samples, c_mp3buf, mp3buf_size);
+    }
 
     env->ReleaseShortArrayElements(buffer_l, j_buffer_l, 0);
     env->ReleaseShortArrayElements(buffer_r, j_buffer_r, 0);
@@ -135,7 +161,7 @@ extern "C" JNIEXPORT int JNICALL
 Java_jaygoo_library_converter_Mp3Converter_flush(
         JNIEnv *env, jclass cls, jbyteArray mp3buf) {
     const jsize mp3buf_size = env->GetArrayLength(mp3buf);
-    unsigned char * c_mp3buf = convertJByteArrayToChars(env, mp3buf);
+    unsigned char *c_mp3buf = convertJByteArrayToChars(env, mp3buf);
 
     int result = lame_encode_flush(lame, c_mp3buf, mp3buf_size);
 

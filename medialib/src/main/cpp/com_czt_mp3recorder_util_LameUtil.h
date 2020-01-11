@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (IIIII)V
  */
 JNIEXPORT void JNICALL Java_com_czt_mp3recorder_util_LameUtil_init
-  (JNIEnv *, jclass, jint, jint, jint, jint, jint);
+        (JNIEnv *, jclass, jint, jint, jint, jint, jint, jint);
 
 /*
  * Class:     com_czt_mp3recorder_util_LameUtil
@@ -21,7 +21,7 @@ JNIEXPORT void JNICALL Java_com_czt_mp3recorder_util_LameUtil_init
  * Signature: ([S[SI[B)I
  */
 JNIEXPORT jint JNICALL Java_com_czt_mp3recorder_util_LameUtil_encode
-  (JNIEnv *, jclass, jshortArray, jshortArray, jint, jbyteArray);
+        (JNIEnv *, jclass, jshortArray, jshortArray, jint, jbyteArray);
 
 /*
  * Class:     com_czt_mp3recorder_util_LameUtil
@@ -29,7 +29,7 @@ JNIEXPORT jint JNICALL Java_com_czt_mp3recorder_util_LameUtil_encode
  * Signature: ([B)I
  */
 JNIEXPORT jint JNICALL Java_com_czt_mp3recorder_util_LameUtil_flush
-  (JNIEnv *, jclass, jbyteArray);
+        (JNIEnv *, jclass, jbyteArray);
 
 /*
  * Class:     com_czt_mp3recorder_util_LameUtil
@@ -37,7 +37,7 @@ JNIEXPORT jint JNICALL Java_com_czt_mp3recorder_util_LameUtil_flush
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_com_czt_mp3recorder_util_LameUtil_close
-  (JNIEnv *, jclass);
+        (JNIEnv *, jclass);
 
 #ifdef __cplusplus
 }
