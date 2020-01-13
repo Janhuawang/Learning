@@ -137,7 +137,7 @@ ConvertPCMtoWAV(const char *inputFile, const char *outFile, Cbool smallEndia, WA
                 count = fread(iBuf, 4, A_BUFFER_SIZE, ifp);
                 if (count > 0) {
                     for (int i = 0; i < count; i++) {
-                        iBuf[i] = BLSWAP_16(iBuf[i]);
+                        iBuf[i] = BLSWAP_32(iBuf[i]);
                     }
                     fwrite(iBuf, 4, count, ofp);
                 }
@@ -189,8 +189,8 @@ int MixCaffFile(FILE *ifp, FILE *mfp, FILE *ofp, MPARAM param) {
     }
 
     // Mix start offset, copy origin data.
-    long startPos = param.startSec * iFormat.mSampleRate * iFormat.mChannelsPerFrame *
-                    iFormat.mBitsPerChannel / 8 + inPos;
+    Uint32 startPos = param.startSec * iFormat.mSampleRate * iFormat.mChannelsPerFrame*iFormat.mBitsPerChannel/8 + inPos;
+    startPos = (startPos % 2 == 0) ? startPos : (startPos - 1);
     if (startPos > 0) {
         fseek(ifp, 0, SEEK_SET);
         FileCopy(ifp, ofp, startPos);
@@ -286,13 +286,13 @@ void AMixFileData(FILE *ifp, FILE *mfp, FILE *ofp, MPARAM param, MIXVALUE mValue
                 data2 = mBuf[i] * param.volumeRate; // 音量比
                 // fade in
                 if (param.fadeIn && mValue.fadeInLen > 0 && mixingDataLen <= mValue.fadeInLen) {
-                    data2 = (data2 * mixingDataLen) / mValue.fadeInLen;
+                    data2 *= mixingDataLen * 1.0 / mValue.fadeInLen;
                 }
 
                 // fade out
                 if (param.fadeOut && mValue.fadeOutLen > 0 &&
                     (mValue.mixLen - mixingDataLen) <= mValue.fadeOutLen) {
-                    data2 = (data2 * (mValue.mixLen - mixingDataLen)) / mValue.fadeOutLen;
+                    data2 *= (mValue.mixLen - mixingDataLen)*1.0 / mValue.fadeOutLen;
                 }
                 mixingDataLen += 2;
                 AMixBytes(data1, data2, &data_mix, &f);

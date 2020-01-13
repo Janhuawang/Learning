@@ -4,12 +4,8 @@
 #include <malloc.h>
 #include "AudioMix.h"
 #include "Wav.h"
-#include "Conversion.h"
 
-
-JNIEXPORT jint
-
-JNICALL
+JNIEXPORT jint JNICALL
 Java_com_medialib_audioeditc_AudioMain_mix(JNIEnv *env, jclass mainObj, jstring srcFile,
                                            jstring coverFile,
                                            jstring outPutFile, jobject paramObj) {
@@ -70,16 +66,12 @@ Java_com_medialib_audioeditc_AudioMain_mix(JNIEnv *env, jclass mainObj, jstring 
     p.startSec = startSec;
     p.volumeRate = volumeRate;
 
-    __android_log_print(ANDROID_LOG_ERROR, "Audio", "MPARAM done %s\n", "!!");
-
     return MixFile(srcFileChar, coverFileChar, outPutFileChar, p);
 }
 
-JNIEXPORT jint
-
-JNICALL
+JNIEXPORT jint JNICALL
 Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj, jstring pcmPath,
-                                                    jstring wavPath, jint byteType) {
+                                                    jstring wavPath,jint byteType,jint channel) {
 
     char *pcmPathChar = (*env)->GetStringUTFChars(env, pcmPath, NULL);
     char *wavPathChar = (*env)->GetStringUTFChars(env, wavPath, NULL);
@@ -87,8 +79,9 @@ Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj,
     WAVE_FORMAT format = {0};
     format.dwSize = 16;
     format.wFormatTag = 1;
-    format.wChannels = 1;
-    format.dwSamplesPerSec = 16000;
+    __android_log_print(ANDROID_LOG_ERROR, "ToWav", "channel %d\n", channel);
+    format.wChannels = channel;
+    format.dwSamplesPerSec = 44100;
     format.wBitsPerSample = 16;
     format.wBlock = format.wChannels * format.wBitsPerSample / 8;
     format.dwBitRate = format.dwSamplesPerSec * format.wChannels * format.wBitsPerSample / 8;
@@ -98,9 +91,7 @@ Java_com_medialib_audioeditc_AudioMain_pcm16leToWav(JNIEnv *env, jclass mainObj,
 }
 
 
-JNIEXPORT jint
-
-JNICALL
+JNIEXPORT jint JNICALL
 Java_com_medialib_audioeditc_AudioMain_getWavHeadSize(JNIEnv *env, jclass mainObj,
                                                       jstring wavPath) {
 

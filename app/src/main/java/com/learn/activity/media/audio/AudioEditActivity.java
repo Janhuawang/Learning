@@ -225,7 +225,7 @@ public class AudioEditActivity extends BaseActivity {
 
     @Override
     protected void initData() {
-        tv_path_1.setText("/storage/emulated/0/aavv/戴青塔娜-寂静的天空.wav");
+        tv_path_1.setText("/storage/emulated/0/wav/b.pcm");
         tv_path_2.setText("/storage/emulated/0/aavv/卡奇社-别来无恙.wav");
     }
 
