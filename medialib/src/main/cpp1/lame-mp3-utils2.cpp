@@ -79,8 +79,9 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
     //open input file and output file
     FILE *fInput = fopen(cInput, "rb");
     FILE *fMp3 = fopen(cMp3, "wb");
+    const int MP3_SIZE = BUFFER_SIZE * 1.25 + 7200; //计算公式pcm_size * 1.25 + 7200
     short int inputBuffer[BUFFER_SIZE * 2];
-    unsigned char mp3Buffer[BUFFER_SIZE];//You must specified at least 7200
+    unsigned char mp3Buffer[MP3_SIZE];//You must specified at least 7200
     int read = 0; // number of bytes in inputBuffer, if in the end return 0
     int write = 0;// number of bytes output in mp3buffer.  can be 0
     long total = 0; // the bytes of reading input file
@@ -94,7 +95,8 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
     } else {
         __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, "多声道");
     }
-
+    __android_log_print(ANDROID_LOG_ERROR, "Audio", "m_inBitRate： %d\n", m_inBitRate);
+    __android_log_print(ANDROID_LOG_ERROR, "Audio", "m_inChannel： %d\n", m_inChannel);
     //convert to mp3
     do {
         read = static_cast<int>(fread(inputBuffer, sizeof(short int) * 2, BUFFER_SIZE, fInput));
@@ -106,10 +108,10 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
 
             if (m_inChannel < 2) {
                 write = lame_encode_buffer(lame, inputBuffer, inputBuffer, nsamples, mp3Buffer,
-                                           BUFFER_SIZE);
+                                           MP3_SIZE);
             } else {
                 write = lame_encode_buffer_interleaved(lame, inputBuffer, nsamples, mp3Buffer,
-                                                       BUFFER_SIZE);
+                                                       MP3_SIZE);
             }
 
 //            write = lame_encode_buffer_interleaved(lame, inputBuffer, read, mp3Buffer, BUFFER_SIZE);
@@ -119,7 +121,7 @@ void JNICALL Java_jaygoo_library_converter_Mp3Converter_convertMp3
         }
         //if in the end flush
         if (read == 0) {
-            lame_encode_flush(lame, mp3Buffer, BUFFER_SIZE);
+            lame_encode_flush(lame, mp3Buffer, MP3_SIZE);
         }
     } while (read != 0);
 
